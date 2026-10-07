@@ -716,6 +716,86 @@ const canvas =
 const ctx =
     canvas.getContext("2d");
 
+/* =========================================================
+   RENDER ERROR FAILSAFE
+========================================================= */
+
+let firstRenderComplete = false;
+
+function showRenderError(message){
+    try{
+        ctx.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        ctx.fillStyle = "#111722";
+        ctx.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        ctx.fillStyle = "#ff596b";
+        ctx.font = "bold 18px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(
+            "Ball Brawl could not start",
+            canvas.width / 2,
+            canvas.height / 2 - 28
+        );
+
+        ctx.fillStyle = "#d8dee9";
+        ctx.font = "12px Arial";
+
+        const errorText =
+            String(message || "Unknown error")
+                .replace(/\s+/g, " ")
+                .slice(0, 150);
+
+        ctx.fillText(
+            errorText,
+            canvas.width / 2,
+            canvas.height / 2 + 4
+        );
+
+        ctx.fillStyle = "#7f8a9d";
+        ctx.font = "11px Arial";
+
+        ctx.fillText(
+            "Open the browser console (F12) for details.",
+            canvas.width / 2,
+            canvas.height / 2 + 30
+        );
+    }catch(_){}
+}
+
+window.addEventListener(
+    "error",
+    event => {
+        showRenderError(
+            event.error?.message ||
+            event.message ||
+            "JavaScript error"
+        );
+    }
+);
+
+window.addEventListener(
+    "unhandledrejection",
+    event => {
+        showRenderError(
+            event.reason?.message ||
+            event.reason ||
+            "Unhandled promise error"
+        );
+    }
+);
+
 const ballSelection =
     document.getElementById("ballSelection");
 
@@ -8877,9 +8957,27 @@ function gameLoop(
     );
 }
 
+try{
+    draw();
+    firstRenderComplete = true;
+}catch(error){
+    showRenderError(
+        error?.message ||
+        error
+    );
+}
+
 requestAnimationFrame(
     gameLoop
 );
+
+setTimeout(() => {
+    if(!firstRenderComplete){
+        showRenderError(
+            "The first canvas render did not complete."
+        );
+    }
+}, 750);
 
 </script>
 

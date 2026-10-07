@@ -4501,204 +4501,9 @@ function updateBall(
    BETTER AI
 ========================================================= */
 
-function updateEnemyAI(
-    dt
-){
-
-    if(
-        !enemy ||
-        enemy.dead ||
-        !player ||
-        player.dead ||
-        aiming ||
-        countdown > 0
-    ){
-        return;
-    }
-
-    aiTimer -=
-        dt;
-
-    if(
-        aiTimer > 0
-    ){
-        return;
-    }
-
-    const difficulty =
-        DIFFICULTY[
-            difficultySelect.value
-        ] ||
-        1;
-
-    aiTimer =
-        randomRange(
-            .22,
-            .45
-        ) /
-        difficulty;
-
-    const dx =
-        player.x -
-        enemy.x;
-
-    const dy =
-        player.y -
-        enemy.y;
-
-    const distanceToPlayer =
-        Math.hypot(
-            dx,
-            dy
-        );
-
-    let desiredX = dx;
-
-    let desiredY = dy;
-
-    /*
-       Different difficulty levels
-       give the AI different behavior.
-    */
-
-    if(
-        difficultySelect.value ===
-        "easy"
-    ){
-
-        desiredX +=
-            randomRange(
-                -80,
-                80
-            );
-
-        desiredY +=
-            randomRange(
-                -80,
-                80
-            );
-
-    }else if(
-        difficultySelect.value ===
-        "normal"
-    ){
-
-        desiredX +=
-            randomRange(
-                -35,
-                35
-            );
-
-        desiredY +=
-            randomRange(
-                -35,
-                35
-            );
-
-    }else if(
-        difficultySelect.value ===
-        "hard"
-    ){
-
-        desiredX +=
-            randomRange(
-                -15,
-                15
-            );
-
-        desiredY +=
-            randomRange(
-                -15,
-                15
-            );
-
-    }else{
-
-        desiredX +=
-            randomRange(
-                -6,
-                6
-            );
-
-        desiredY +=
-            randomRange(
-                -6,
-                6
-            );
-    }
-
-    /*
-       Some balls prefer different distances.
-    */
-
-    if(
-        enemy.type ===
-        "homing" ||
-        enemy.type ===
-        "crystal"
-    ){
-
-        if(
-            distanceToPlayer <
-            170
-        ){
-
-            desiredX =
-                -dx;
-
-            desiredY =
-                -dy;
-        }
-    }
-
-    if(
-        enemy.type ===
-        "tank"
-    ){
-
-        if(
-            distanceToPlayer >
-            100
-        ){
-
-            desiredX =
-                dx;
-
-            desiredY =
-                dy;
-        }
-    }
-
-    const dir =
-        normalize(
-            desiredX,
-            desiredY
-        );
-
-    const speed =
-        Math.max(
-            LAUNCH_SPEED,
-            Math.hypot(
-                enemy.vx,
-                enemy.vy
-            )
-        );
-
-    enemy.vx +=
-        (
-            dir.x *
-            speed -
-            enemy.vx
-        ) *
-        .35;
-
-    enemy.vy +=
-        (
-            dir.y *
-            speed -
-            enemy.vy
-        ) *
-        .35;
+function updateEnemyAI(){
+    // Intentionally empty.
+    // Enemy direction is selected once when the enemy spawns.
 }
 
 /* =========================================================
@@ -6923,6 +6728,12 @@ function startFight(){
         player.vy =
         enemy.vx =
         enemy.vy = 0;
+    
+    // Enemy chooses one direction when it spawns.
+    // It does not steer toward the player after launch.
+    enemy.aiLaunchAngle =
+        Math.random() * Math.PI * 2;
+
 
     aimMouseX =
         player.x +
@@ -6987,21 +6798,12 @@ function launchBoth(
         LAUNCH_SPEED;
 
     /*
-       Enemy launches toward the player
-       at the exact same moment.
+       Enemy uses the direction it chose at spawn.
+       It does not aim/chase the player.
     */
 
     const enemyAngle =
-        Math.atan2(
-            player.y -
-                enemy.y,
-            player.x -
-                enemy.x
-        ) +
-        randomRange(
-            -.35,
-            .35
-        );
+        enemy.aiLaunchAngle;
 
     enemy.vx =
         Math.cos(
@@ -7118,20 +6920,15 @@ function startNextSurvivalWave(){
             false
         );
 
-    const angle =
-        Math.atan2(
-            player.y -
-                enemy.y,
-            player.x -
-                enemy.x
-        );
+    enemy.aiLaunchAngle =
+        Math.random() * Math.PI * 2;
 
     enemy.vx =
-        Math.cos(angle) *
+        Math.cos(enemy.aiLaunchAngle) *
         LAUNCH_SPEED;
 
     enemy.vy =
-        Math.sin(angle) *
+        Math.sin(enemy.aiLaunchAngle) *
         LAUNCH_SPEED;
 
     player.hitCooldown =
@@ -9012,10 +8809,6 @@ function gameLoop(
 
         updateBall(
             enemy,
-            dt
-        );
-
-        updateEnemyAI(
             dt
         );
 

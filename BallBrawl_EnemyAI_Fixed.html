@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ball Brawl</title>
+<style>
+html,body{margin:0;width:100%;height:100%;background:#080b10;color:#fff;font-family:Arial,Helvetica,sans-serif}
+#loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px;background:#080b10;z-index:9999}
+#error{display:none;position:fixed;inset:0;padding:40px;font-family:Arial,Helvetica,sans-serif;background:#080b10;color:#fff;z-index:10000}
+</style>
+</head>
+<body>
+<div id="loading">Loading Ball Brawl...</div>
+<div id="error"></div>
+<script>
+"use strict";
+
+const SOURCE_URL = "https://raw.githubusercontent.com/krmizi433-oss/ballgamecuzwhynot/refs/heads/main/index.html";
+
+function showError(message){
+    document.getElementById("loading").style.display = "none";
+    const box = document.getElementById("error");
+    box.style.display = "block";
+    box.textContent = message;
+}
+
+function patchBallBrawl(html){
+    let patched = html;
+
+    // 1. Keep the old AI function name so any existing call is harmless,
+    //    but completely disable the constant steering/chasing behavior.
+    const aiStart = patched.indexOf("function updateEnemyAI(");
+    const aiEndMarker = "/* =========================================================\n   HAZARDS\n========================================================= */";
+    const aiEnd = patched.indexOf(aiEndMarker, aiStart);
+
+    if(aiStart === -1 || aiEnd === -1){
+        throw new Error("Could not find the old enemy AI section.");
+    }
+
+    const newAI = `function updateEnemyAI(){\n    // Enemy movement is intentionally natural now.\n    // Its direction is chosen once when the fight starts, then\n    // physics, wall bounces, collisions and abilities control it.\n}\n`;
+
+    patched =
+        patched.slice(0, aiStart) +
+        newAI +
+        patched.slice(aiEnd);
+
+    // 2. Choose the enemy's direction once when the enemy is spawned.
+    //    The direction is random, with a mild bias toward the player.
+    const spawnInsert = `\n    enemy.aiLaunchAngle =\n        Math.atan2(\n            player.y -\n                enemy.y,\n            player.x -\n                enemy.x\n        ) +\n        randomRange(\n            -Math.PI * 0.65,\n            Math.PI * 0.65\n        );\n`;
+
+    const spawnAnchor = `    player.vx =\n        player.vy =\n        enemy.vx =\n        enemy.vy = 0;`;
+
+    const startIndex = patched.indexOf("function startFight()");
+    const anchorIndex = patched.indexOf(spawnAnchor, startIndex);
+
+    if(startIndex === -1 || anchorIndex === -1 || anchorIndex > patched.indexOf("/* =========================================================\n   LAUNCH BOTH", startIndex)){
+        throw new Error("Could not find the fight spawn section.");
+    }
+
+    patched =
+        patched.slice(0, anchorIndex) +
+        spawnInsert +
+        patched.slice(anchorIndex);
+
+    // 3. Make launchBoth use the already-selected direction.
+    const oldEnemyLaunch = `    /*\n       Enemy launches toward the player\n       at the exact same moment.\n    */\n\n    const enemyAngle =\n        Math.atan2(\n            player.y -\n                enemy.y,\n            player.x -\n                enemy.x\n        ) +\n        randomRange(\n            -.35,\n            .35\n        );\n\n    enemy.vx =\n        Math.cos(\n            enemyAngle\n        ) *\n        LAUNCH_SPEED;\n\n    enemy.vy =\n        Math.sin(\n            enemyAngle\n        ) *\n        LAUNCH_SPEED;`;
+
+    const newEnemyLaunch = `    /*\n       The enemy picked this direction when it spawned.\n       It does not chase the player after launch.\n    */\n\n    const enemyAngle =\n        enemy.aiLaunchAngle;\n\n    enemy.vx =\n        Math.cos(\n            enemyAngle\n        ) *\n        LAUNCH_SPEED;\n\n    enemy.vy =\n        Math.sin(\n            enemyAngle\n        ) *\n        LAUNCH_SPEED;`;
+
+    if(!patched.includes(oldEnemyLaunch)){
+        throw new Error("Could not find the old enemy launch code.");
+    }
+
+    patched = patched.replace(oldEnemyLaunch, newEnemyLaunch);
+
+    return patched;
+}
+
+async function load(){
+    try{
+        const response = await fetch(SOURCE_URL, {cache:"no-store"});
+        if(!response.ok){
+            throw new Error("GitHub returned HTTP " + response.status + ".");
+        }
+
+        const original = await response.text();
+        const patched = patchBallBrawl(original);
+
+        document.open();
+        document.write(patched);
+        document.close();
+    }catch(error){
+        showError(
+            "Ball Brawl could not be loaded.\n\n" +
+            String(error) +
+            "\n\nOpen this file while connected to the internet, or use the GitHub Pages version of your project."
+        );
+    }
+}
+
+load();
+</script>
+</body>
+</html>

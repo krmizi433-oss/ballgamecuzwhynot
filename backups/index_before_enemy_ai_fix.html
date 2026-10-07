@@ -1,0 +1,9094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ball Brawl</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    margin:0;
+    min-height:100vh;
+    font-family:Arial,Helvetica,sans-serif;
+    color:#fff;
+    background:
+        radial-gradient(circle at top,#26334a 0%,#111722 38%,#080b10 100%);
+}
+
+header{
+    padding:18px 20px;
+    text-align:center;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    background:rgba(5,8,13,.72);
+    backdrop-filter:blur(8px);
+}
+
+header h1{
+    margin:0;
+    font-size:26px;
+}
+
+.hub{
+    width:min(1100px,94%);
+    margin:0 auto;
+    padding:20px 0 50px;
+}
+
+.title{
+    text-align:center;
+    margin-bottom:14px;
+}
+
+.title h2{
+    margin:0 0 5px;
+    font-size:31px;
+}
+
+.title p{
+    margin:0;
+    color:#9da8b8;
+    font-size:14px;
+}
+
+/* =========================
+   TOP OPTIONS
+========================= */
+
+.top-options{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin:12px 0;
+}
+
+.option-box{
+    padding:9px;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:10px;
+    background:rgba(17,23,34,.8);
+}
+
+.option-label{
+    display:block;
+    margin-bottom:5px;
+    color:#8793a7;
+    font-size:10px;
+    font-weight:bold;
+    text-transform:uppercase;
+}
+
+select,
+input{
+    width:100%;
+    height:34px;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:8px;
+    background:#1b2433;
+    color:#fff;
+    padding:0 9px;
+    outline:none;
+}
+
+input:focus,
+select:focus{
+    border-color:rgba(255,255,255,.3);
+}
+
+/* =========================
+   BALL SELECTION
+========================= */
+
+.selection-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:end;
+    gap:10px;
+    margin-top:12px;
+}
+
+.selection-title{
+    margin:18px 0 8px;
+    font-size:16px;
+    color:#cdd5e2;
+}
+
+.ball-selection{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(108px,1fr));
+    gap:7px;
+    max-height:335px;
+    overflow-y:auto;
+    padding:5px;
+    scrollbar-width:thin;
+}
+
+.ball-card{
+    position:relative;
+    min-height:72px;
+    padding:8px 5px;
+    border:1px solid rgba(255,255,255,.09);
+    border-radius:10px;
+    background:rgba(20,27,39,.85);
+    cursor:pointer;
+    text-align:center;
+    transition:
+        transform .12s ease,
+        border-color .12s ease,
+        background .12s ease;
+}
+
+.ball-card:hover{
+    transform:translateY(-2px);
+    border-color:rgba(255,255,255,.3);
+    background:rgba(31,40,57,.95);
+}
+
+.ball-card.selected{
+    border-color:#fff;
+    background:rgba(55,68,91,.95);
+    box-shadow:0 0 14px rgba(255,255,255,.08);
+}
+
+.ball-preview{
+    width:27px;
+    height:27px;
+    margin:0 auto 5px;
+    border-radius:50%;
+    box-shadow:
+        inset -5px -6px 9px rgba(0,0,0,.35),
+        inset 3px 3px 7px rgba(255,255,255,.35),
+        0 3px 9px rgba(0,0,0,.3);
+}
+
+.ball-name{
+    font-size:11px;
+    font-weight:bold;
+}
+
+.ball-number{
+    position:absolute;
+    top:4px;
+    right:5px;
+    color:#7d899b;
+    font-size:9px;
+}
+
+/* =========================
+   ARENA
+========================= */
+
+.arena-container{
+    width:min(500px,94vw);
+    margin:16px auto 0;
+    padding:11px;
+    border-radius:15px;
+    border:1px solid rgba(255,255,255,.1);
+    background:rgba(10,14,21,.86);
+    box-shadow:
+        0 18px 45px rgba(0,0,0,.35),
+        inset 0 1px rgba(255,255,255,.04);
+}
+
+.health-container{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-bottom:8px;
+}
+
+.health-box{
+    padding:7px 9px;
+    border-radius:9px;
+    background:rgba(255,255,255,.055);
+    border:1px solid rgba(255,255,255,.08);
+}
+
+.health-label{
+    display:flex;
+    justify-content:space-between;
+    gap:5px;
+    margin-bottom:5px;
+    font-size:11px;
+    color:#dce3ee;
+}
+
+.health-bar{
+    width:100%;
+    height:9px;
+    overflow:hidden;
+    border-radius:99px;
+    background:#202735;
+}
+
+.health-fill{
+    width:100%;
+    height:100%;
+    border-radius:inherit;
+    transition:width .12s linear;
+}
+
+.player-health{
+    background:#36d778;
+}
+
+.enemy-health{
+    background:#ff4e61;
+}
+
+/* =========================
+   HUD
+========================= */
+
+.hud{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+    margin-bottom:8px;
+}
+
+.hud-box{
+    padding:8px 9px;
+    border-radius:9px;
+    background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.07);
+}
+
+.hud-top{
+    display:flex;
+    justify-content:space-between;
+    gap:5px;
+    margin-bottom:4px;
+    color:#cbd5e3;
+    font-size:9px;
+    font-weight:bold;
+}
+
+.meter{
+    height:7px;
+    overflow:hidden;
+    border-radius:99px;
+    background:#202735;
+}
+
+.meter-fill{
+    width:0;
+    height:100%;
+    border-radius:inherit;
+    background:#b86cff;
+    transition:width .12s linear;
+}
+
+.hud-small{
+    display:flex;
+    justify-content:space-between;
+    gap:5px;
+    margin-top:4px;
+    color:#738096;
+    font-size:9px;
+}
+
+/* =========================
+   CONTROLS
+========================= */
+
+.controls{
+    display:flex;
+    gap:7px;
+}
+
+button{
+    flex:1;
+    min-height:38px;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:9px;
+    background:#263247;
+    color:#fff;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.12s ease;
+}
+
+button:hover{
+    background:#33425c;
+    transform:translateY(-1px);
+}
+
+button:disabled{
+    opacity:.45;
+    cursor:default;
+    transform:none;
+}
+
+#startBtn{
+    background:#256b43;
+}
+
+#startBtn:hover{
+    background:#2d8250;
+}
+
+#randomBtn{
+    background:#44346c;
+}
+
+#randomBtn:hover{
+    background:#57448a;
+}
+
+#ultimateBtn{
+    background:#66469a;
+}
+
+#ultimateBtn.ready{
+    background:#a344ff;
+    box-shadow:
+        0 0 15px rgba(163,68,255,.45);
+}
+
+.status{
+    min-height:18px;
+    margin-top:7px;
+    text-align:center;
+    font-size:11px;
+    color:#9ba7b8;
+}
+
+/* =========================
+   CANVAS
+========================= */
+
+.canvas-wrap{
+    position:relative;
+    width:100%;
+    display:flex;
+    justify-content:center;
+}
+
+canvas{
+    display:block;
+    width:100%;
+    max-width:500px;
+    height:auto;
+    border-radius:10px;
+    background:#101722;
+    cursor:crosshair;
+}
+
+/* =========================
+   RESULT
+========================= */
+
+.result-overlay{
+    position:absolute;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    border-radius:10px;
+    background:rgba(4,7,11,.72);
+    pointer-events:none;
+}
+
+.result-overlay.show{
+    display:flex;
+}
+
+.result-card{
+    width:78%;
+    padding:18px;
+    text-align:center;
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:14px;
+    background:rgba(18,24,35,.95);
+    box-shadow:0 18px 50px rgba(0,0,0,.45);
+}
+
+.result-card h2{
+    margin:0 0 7px;
+    font-size:30px;
+}
+
+.result-card p{
+    margin:4px 0;
+    color:#aeb9c9;
+    font-size:12px;
+}
+
+/* =========================
+   ABILITY INFO
+========================= */
+
+.ability-info{
+    width:min(500px,94vw);
+    margin:10px auto 0;
+    padding:11px 13px;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:11px;
+    background:rgba(17,23,34,.8);
+    color:#aeb8c7;
+    font-size:12px;
+    line-height:1.45;
+}
+
+.ability-info strong{
+    color:#fff;
+}
+
+.tip{
+    margin-top:5px;
+    color:#778397;
+    font-size:11px;
+}
+
+/* =========================
+   PROFILE
+========================= */
+
+.profile{
+    margin-top:10px;
+    text-align:center;
+    color:#717d90;
+    font-size:10px;
+}
+
+@media(max-width:650px){
+
+    .top-options{
+        grid-template-columns:1fr;
+    }
+
+    .health-container,
+    .hud{
+        grid-template-columns:1fr;
+    }
+
+    .controls{
+        flex-wrap:wrap;
+    }
+
+    .controls button{
+        min-width:30%;
+    }
+
+    .ball-selection{
+        max-height:300px;
+        grid-template-columns:repeat(auto-fit,minmax(88px,1fr));
+    }
+
+    .title h2{
+        font-size:26px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Game Hub</h1>
+</header>
+
+<main class="hub">
+
+    <div class="title">
+        <h2>Ball Brawl</h2>
+        <p>Choose a ball, choose a direction, then fight.</p>
+    </div>
+
+    <div class="top-options">
+
+        <div class="option-box">
+            <label class="option-label">Game Mode</label>
+
+            <select id="modeSelect">
+                <option value="classic">Classic</option>
+                <option value="survival">Survival</option>
+                <option value="chaos">Chaos</option>
+                <option value="boss">Boss Fight</option>
+                <option value="onehit">One Hit</option>
+                <option value="giant">Giant</option>
+                <option value="tiny">Tiny</option>
+            </select>
+        </div>
+
+        <div class="option-box">
+            <label class="option-label">Difficulty</label>
+
+            <select id="difficultySelect">
+                <option value="easy">Easy</option>
+                <option value="normal" selected>Normal</option>
+                <option value="hard">Hard</option>
+                <option value="insane">Insane</option>
+            </select>
+        </div>
+
+    </div>
+
+    <div class="selection-title">Choose Your Ball</div>
+
+    <div class="selection-head">
+
+        <input
+            id="searchBox"
+            type="text"
+            placeholder="Search balls..."
+        >
+
+    </div>
+
+    <div class="ball-selection" id="ballSelection"></div>
+
+    <div class="arena-container">
+
+        <div class="health-container">
+
+            <div class="health-box">
+
+                <div class="health-label">
+                    <span id="playerName">Player</span>
+                    <span id="playerHpText">100 / 100</span>
+                </div>
+
+                <div class="health-bar">
+                    <div
+                        id="playerHealth"
+                        class="health-fill player-health">
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="health-box">
+
+                <div class="health-label">
+                    <span id="enemyName">Enemy</span>
+                    <span id="enemyHpText">100 / 100</span>
+                </div>
+
+                <div class="health-bar">
+                    <div
+                        id="enemyHealth"
+                        class="health-fill enemy-health">
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="hud">
+
+            <div class="hud-box">
+
+                <div class="hud-top">
+                    <span>PLAYER ULTIMATE</span>
+                    <span id="ultimatePercent">0%</span>
+                </div>
+
+                <div class="meter">
+                    <div
+                        id="ultimateMeter"
+                        class="meter-fill">
+                    </div>
+                </div>
+
+                <div class="hud-small">
+                    <span id="comboText">Combo 0</span>
+                    <span id="profileText">Wins 0</span>
+                </div>
+
+            </div>
+
+            <div class="hud-box">
+
+                <div class="hud-top">
+                    <span>ENEMY</span>
+                    <span id="enemyState">Waiting</span>
+                </div>
+
+                <div class="meter">
+                    <div
+                        id="enemyMeter"
+                        class="meter-fill">
+                    </div>
+                </div>
+
+                <div class="hud-small">
+                    <span id="enemyModeText">Normal AI</span>
+                    <span id="waveText">Wave 1</span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="controls">
+
+            <button id="startBtn">
+                Start Fight
+            </button>
+
+            <button id="randomBtn">
+                Random Enemy
+            </button>
+
+            <button id="ultimateBtn" disabled>
+                Ultimate
+            </button>
+
+        </div>
+
+        <div class="status" id="status">
+            Stage 1 — Select a ball and press Start Fight.
+        </div>
+
+        <div class="canvas-wrap">
+
+            <canvas
+                id="arena"
+                width="500"
+                height="560">
+            </canvas>
+
+            <div
+                id="resultOverlay"
+                class="result-overlay">
+
+                <div class="result-card">
+
+                    <h2 id="resultTitle">
+                        Victory
+                    </h2>
+
+                    <p id="resultSubtitle">
+                        You won the fight.
+                    </p>
+
+                    <p id="resultStats">
+                        Wins 0 • Losses 0 • Coins 0
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div
+        class="ability-info"
+        id="abilityInfo">
+
+        <strong>Basic:</strong>
+        A simple ball with reliable collision damage.
+
+        <div class="tip">
+            Stage 2: move your mouse to aim. Click the arena to launch both balls.
+        </div>
+
+    </div>
+
+    <div class="profile" id="profileDisplay">
+        Wins: 0 • Losses: 0 • Coins: 0
+    </div>
+
+</main>
+
+<script>
+"use strict";
+
+/* =========================================================
+   DOM
+========================================================= */
+
+const canvas =
+    document.getElementById("arena");
+
+const ctx =
+    canvas.getContext("2d");
+
+const ballSelection =
+    document.getElementById("ballSelection");
+
+const searchBox =
+    document.getElementById("searchBox");
+
+const abilityInfo =
+    document.getElementById("abilityInfo");
+
+const startBtn =
+    document.getElementById("startBtn");
+
+const randomBtn =
+    document.getElementById("randomBtn");
+
+const ultimateBtn =
+    document.getElementById("ultimateBtn");
+
+const playerHealth =
+    document.getElementById("playerHealth");
+
+const enemyHealth =
+    document.getElementById("enemyHealth");
+
+const playerHpText =
+    document.getElementById("playerHpText");
+
+const enemyHpText =
+    document.getElementById("enemyHpText");
+
+const playerName =
+    document.getElementById("playerName");
+
+const enemyName =
+    document.getElementById("enemyName");
+
+const status =
+    document.getElementById("status");
+
+const ultimateMeter =
+    document.getElementById("ultimateMeter");
+
+const ultimatePercent =
+    document.getElementById("ultimatePercent");
+
+const comboText =
+    document.getElementById("comboText");
+
+const profileText =
+    document.getElementById("profileText");
+
+const enemyState =
+    document.getElementById("enemyState");
+
+const enemyMeter =
+    document.getElementById("enemyMeter");
+
+const enemyModeText =
+    document.getElementById("enemyModeText");
+
+const waveText =
+    document.getElementById("waveText");
+
+const profileDisplay =
+    document.getElementById("profileDisplay");
+
+const modeSelect =
+    document.getElementById("modeSelect");
+
+const difficultySelect =
+    document.getElementById("difficultySelect");
+
+const resultOverlay =
+    document.getElementById("resultOverlay");
+
+const resultTitle =
+    document.getElementById("resultTitle");
+
+const resultSubtitle =
+    document.getElementById("resultSubtitle");
+
+const resultStats =
+    document.getElementById("resultStats");
+
+/* =========================================================
+   CONSTANTS
+========================================================= */
+
+const MAX_HP = 100;
+
+const BALL_RADIUS = 32;
+
+const MIN_SPEED = 180;
+
+const MAX_SPEED = 360;
+
+const LAUNCH_SPEED = 230;
+
+const DAMAGE = 12;
+
+const WALL_PADDING = 8;
+
+const SPIKE_PLACEMENT_COOLDOWN = 0.55;
+
+const ARENA_W = canvas.width;
+
+const ARENA_H = canvas.height;
+
+const DIFFICULTY = {
+    easy: 0.75,
+    normal: 1,
+    hard: 1.18,
+    insane: 1.4
+};
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let selectedBallType =
+    "basic";
+
+let enemyBallType =
+    "berserker";
+
+let player = null;
+
+let enemy = null;
+
+let spikes = [];
+
+let particles = [];
+
+let projectiles = [];
+
+let hazards = [];
+
+let structures = [];
+
+let minions = [];
+
+let arenaHazards = [];
+
+let scorchMarks = [];
+
+let fightRunning = false;
+
+let aiming = false;
+
+let fightEnded = false;
+
+let fightStage = "choose";
+
+let countdown = 0;
+
+let countdownShown = 0;
+
+let aimMouseX = 250;
+
+let aimMouseY = 280;
+
+let lastTime =
+    performance.now();
+
+let aiTimer = 0;
+
+let wave = 1;
+
+let survivalKills = 0;
+
+let currentMode = "classic";
+
+let profile;
+
+try {
+    profile =
+        JSON.parse(
+            localStorage.getItem(
+                "ballBrawlProfile"
+            ) ||
+            '{"wins":0,"losses":0,"coins":0}'
+        );
+} catch {
+    profile = {
+        wins: 0,
+        losses: 0,
+        coins: 0
+    };
+}
+
+/* =========================================================
+   BALL DEFINITIONS
+========================================================= */
+
+const BALL_INFO = {
+
+    basic: {
+        name: "Basic",
+        color: "#d9e0e8",
+        description:
+            "Reliable collision damage with no special gimmick."
+    },
+
+    charge: {
+        name: "Charge",
+        color: "#ffcc42",
+        description:
+            "Charges through five stages. Higher stages deal more collision damage."
+    },
+
+    berserker: {
+        name: "Berserker",
+        color: "#ff4d55",
+        description:
+            "Getting hit builds rage. Rage increases speed and damage."
+    },
+
+    shield: {
+        name: "Shield",
+        color: "#62a8ff",
+        description:
+            "Periodically activates a shield that blocks a collision and counterattacks."
+    },
+
+    spike: {
+        name: "Spike",
+        color: "#bfc7d4",
+        description:
+            "Places permanent spikes along the border whenever it hits a wall."
+    },
+
+    poison: {
+        name: "Poison Spike",
+        color: "#77e35b",
+        description:
+            "Creates border spikes that poison enemies when they touch them."
+    },
+
+    magnet: {
+        name: "Magnet",
+        color: "#c94cff",
+        description:
+            "Periodically pulls the opponent toward itself."
+    },
+
+    dash: {
+        name: "Dash",
+        color: "#4ce1ff",
+        description:
+            "Periodically bursts forward at extreme speed."
+    },
+
+    bomb: {
+        name: "Bomb",
+        color: "#ff8a3d",
+        description:
+            "Ball collisions create explosions that damage anything nearby."
+    },
+
+    splitter: {
+        name: "Splitter",
+        color: "#ffdd67",
+        description:
+            "Starts as a large Stage 2 ball. When it dies it splits into 2 or 3 Stage 1 balls. Stage 1 balls do not split when they die. If one survives long enough it grows into Stage 2, then can split when it dies."
+    },
+
+    healer: {
+        name: "Healer",
+        color: "#55ef91",
+        description:
+            "Regenerates a small amount of HP over time."
+    },
+
+    vampire: {
+        name: "Vampire",
+        color: "#bd315d",
+        description:
+            "Direct collision damage restores part of the damage dealt."
+    },
+
+    reflector: {
+        name: "Reflector",
+        color: "#a8d8ff",
+        description:
+            "Reflects a portion of incoming collision damage back."
+    },
+
+    thorns: {
+        name: "Thorns",
+        color: "#5fc76a",
+        description:
+            "Direct attackers take recoil damage."
+    },
+
+    freeze: {
+        name: "Freeze",
+        color: "#8deaff",
+        description:
+            "Hits temporarily slow the opponent."
+    },
+
+    burn: {
+        name: "Burn",
+        color: "#ff6338",
+        description:
+            "Hits ignite the enemy and deal damage over several seconds."
+    },
+
+    lightning: {
+        name: "Lightning",
+        color: "#f5e45b",
+        description:
+            "Periodically calls down a lightning strike."
+    },
+
+    teleporter: {
+        name: "Teleporter",
+        color: "#9b72ff",
+        description:
+            "Periodically teleports to another safe position."
+    },
+
+    gravity: {
+        name: "Gravity",
+        color: "#7568c8",
+        description:
+            "Creates a gravity field that bends enemy movement."
+    },
+
+    ricochet: {
+        name: "Ricochet",
+        color: "#e5e5e5",
+        description:
+            "Each wall bounce increases speed and collision damage."
+    },
+
+    wallmaker: {
+        name: "Wall Maker",
+        color: "#9c9caa",
+        description:
+            "Creates temporary barriers on wall hits."
+    },
+
+    minelayer: {
+        name: "Mine Layer",
+        color: "#555c68",
+        description:
+            "Drops proximity mines."
+    },
+
+    turret: {
+        name: "Turret",
+        color: "#7695a8",
+        description:
+            "Deploys a small automatic turret."
+    },
+
+    drone: {
+        name: "Drone",
+        color: "#52c4c4",
+        description:
+            "Summons an orbiting attack drone."
+    },
+
+    boomerang: {
+        name: "Boomerang",
+        color: "#d2a05d",
+        description:
+            "Fires a returning projectile."
+    },
+
+    homing: {
+        name: "Homing",
+        color: "#ff7cb8",
+        description:
+            "Fires tracking projectiles."
+    },
+
+    doublehit: {
+        name: "Double Hit",
+        color: "#ffaf45",
+        description:
+            "Successful collision triggers a second strike."
+    },
+
+    executioner: {
+        name: "Executioner",
+        color: "#9c2028",
+        description:
+            "Deals a huge bonus against enemies below 25% HP."
+    },
+
+    glass: {
+        name: "Glass Cannon",
+        color: "#e9f8ff",
+        description:
+            "Very high damage, but only 65 maximum HP."
+    },
+
+    speedster: {
+        name: "Speedster",
+        color: "#38d8ff",
+        description:
+            "Extremely fast movement with weaker collision damage."
+    },
+
+    tank: {
+        name: "Tank",
+        color: "#667080",
+        description:
+            "Large and slow with heavy damage reduction."
+    },
+
+    shrinker: {
+        name: "Shrinker",
+        color: "#d28bff",
+        description:
+            "Hits temporarily shrink the enemy."
+    },
+
+    grower: {
+        name: "Grower",
+        color: "#79e35d",
+        description:
+            "Gets larger and stronger after direct hits."
+    },
+
+    timekeeper: {
+        name: "Timekeeper",
+        color: "#c4b7ff",
+        description:
+            "Slows enemies that get close."
+    },
+
+    orbitals: {
+        name: "Orbitals",
+        color: "#58e6db",
+        description:
+            "Three orbiting damaging objects."
+    },
+
+    webber: {
+        name: "Webber",
+        color: "#e1e1e1",
+        description:
+            "Leaves sticky web zones."
+    },
+
+    firering: {
+        name: "Fire Ring",
+        color: "#ff7540",
+        description:
+            "Releases an expanding damage ring."
+    },
+
+    shockwave: {
+        name: "Shockwave",
+        color: "#8b9fff",
+        description:
+            "Releases radial knockback waves."
+    },
+
+    boiling: {
+        name: "Boiling",
+        color: "#ff5c31",
+        description:
+            "Gets stronger as its own HP decreases."
+    },
+
+    clone: {
+        name: "Clone",
+        color: "#aa8cff",
+        description:
+            "Creates a temporary weaker copy at low HP."
+    },
+
+    poisoncloud: {
+        name: "Poison Cloud",
+        color: "#4bcf63",
+        description:
+            "Leaves toxic clouds after wall impacts."
+    },
+
+    icetrail: {
+        name: "Ice Trail",
+        color: "#72dfff",
+        description:
+            "Leaves freezing patches after wall impacts."
+    },
+
+    crystal: {
+        name: "Crystal",
+        color: "#72baff",
+        description:
+            "Creates crystals that fire inward."
+    },
+
+    bouncer: {
+        name: "Bouncer",
+        color: "#f0b94d",
+        description:
+            "Wall impacts grant speed and temporary armor."
+    },
+
+    phase: {
+        name: "Phase",
+        color: "#caaaff",
+        description:
+            "Temporarily ignores direct collision."
+    },
+
+    roulette: {
+        name: "Roulette",
+        color: "#ff72a7",
+        description:
+            "Receives a random temporary combat effect."
+    }
+};
+
+const BALL_ORDER = [
+    "basic",
+    "charge",
+    "berserker",
+    "shield",
+    "spike",
+    "poison",
+    "magnet",
+    "dash",
+    "bomb",
+    "splitter",
+    "healer",
+    "vampire",
+    "reflector",
+    "thorns",
+    "freeze",
+    "burn",
+    "lightning",
+    "teleporter",
+    "gravity",
+    "ricochet",
+    "wallmaker",
+    "minelayer",
+    "turret",
+    "drone",
+    "boomerang",
+    "homing",
+    "doublehit",
+    "executioner",
+    "glass",
+    "speedster",
+    "tank",
+    "shrinker",
+    "grower",
+    "timekeeper",
+    "orbitals",
+    "webber",
+    "firering",
+    "shockwave",
+    "boiling",
+    "clone",
+    "poisoncloud",
+    "icetrail",
+    "crystal",
+    "bouncer",
+    "phase",
+    "roulette"
+];
+
+/* =========================================================
+   UTILITIES
+========================================================= */
+
+function clamp(
+    value,
+    min,
+    max
+){
+    return Math.max(
+        min,
+        Math.min(max,value)
+    );
+}
+
+function randomRange(
+    min,
+    max
+){
+    return min +
+        Math.random() *
+        (max - min);
+}
+
+function normalize(
+    x,
+    y
+){
+
+    const len =
+        Math.hypot(x,y);
+
+    if(len < 0.0001){
+        return {
+            x:1,
+            y:0
+        };
+    }
+
+    return {
+        x:x / len,
+        y:y / len
+    };
+}
+
+function distance(
+    a,
+    b
+){
+    return Math.hypot(
+        a.x - b.x,
+        a.y - b.y
+    );
+}
+
+function shadeColor(
+    color,
+    amount
+){
+
+    const hex =
+        color.replace("#","");
+
+    const num =
+        parseInt(hex,16);
+
+    let r =
+        (num >> 16) +
+        amount;
+
+    let g =
+        ((num >> 8) & 255) +
+        amount;
+
+    let b =
+        (num & 255) +
+        amount;
+
+    r = clamp(r,0,255);
+    g = clamp(g,0,255);
+    b = clamp(b,0,255);
+
+    return "#" +
+        (
+            (r << 16) |
+            (g << 8) |
+            b
+        )
+        .toString(16)
+        .padStart(6,"0");
+}
+
+function getOtherBall(
+    ball
+){
+    return ball === player
+        ? enemy
+        : player;
+}
+
+function saveProfile(){
+
+    localStorage.setItem(
+        "ballBrawlProfile",
+        JSON.stringify(profile)
+    );
+}
+
+/* =========================================================
+   BALL CREATION
+========================================================= */
+
+function createBall(
+    type,
+    x,
+    y,
+    isPlayer = false,
+    options = {}
+){
+
+    const ball = {
+
+        type,
+
+        x,
+        y,
+
+        vx:0,
+        vy:0,
+
+        radius:BALL_RADIUS,
+
+        hp:MAX_HP,
+
+        maxHp:MAX_HP,
+
+        hitCooldown:0,
+
+        poisonTimer:0,
+        poisonTickTimer:0,
+
+        burnTimer:0,
+        burnTickTimer:0,
+
+        slowTimer:0,
+        slowAmount:1,
+
+        chargeStage:1,
+        chargeTimer:0,
+
+        rage:0,
+
+        shieldActive:false,
+        shieldTimer:0,
+        shieldCooldown:1.5,
+
+        spikeCooldown:0,
+
+        abilityTimer:
+            1 +
+            Math.random(),
+
+        abilityTimer2:
+            1 +
+            Math.random(),
+
+        ricochetPower:0,
+
+        growAmount:0,
+
+        shrinkTimer:0,
+        shrinkAmount:1,
+
+        phaseActive:false,
+        phaseTimer:0,
+        phaseCooldown:2,
+
+        rouletteTimer:3,
+        rouletteEffect:"none",
+        roulettePower:1,
+        rouletteEffectTimer:0,
+
+        doubleHitCooldown:0,
+
+        cloneCreated:false,
+
+        droneAngle:
+            Math.random() *
+            Math.PI * 2,
+
+        orbitalAngle:
+            Math.random() *
+            Math.PI * 2,
+
+        combo:0,
+
+        comboTimer:0,
+
+        ultimate:0,
+
+        armorTimer:0,
+
+        dead:false,
+
+        isPlayer,
+
+        isBoss:
+            !!options.isBoss,
+
+        splitStage:
+            options.splitStage ||
+            (
+                type === "splitter"
+                    ? 2
+                    : 0
+            ),
+
+        splitTriggered:false,
+
+        splitLife:
+            options.splitLife ||
+            0,
+
+        aiStyle:
+            options.aiStyle ||
+            "aggressive"
+    };
+
+    if(type === "glass"){
+
+        ball.maxHp = 65;
+
+        ball.hp = 65;
+    }
+
+    if(type === "tank"){
+
+        ball.radius = 34;
+    }
+
+    if(type === "splitter"){
+
+        ball.radius =
+            BALL_RADIUS * 1.42;
+
+        ball.splitStage = 2;
+    }
+
+    if(ball.isBoss){
+
+        ball.maxHp =
+            modeSelect.value === "boss"
+                ? 500
+                : 400;
+
+        ball.hp =
+            ball.maxHp;
+
+        ball.radius = 52;
+    }
+
+    if(modeSelect.value === "giant"){
+
+        ball.radius *= 1.35;
+    }
+
+    if(modeSelect.value === "tiny"){
+
+        ball.radius *= 0.65;
+    }
+
+    return ball;
+}
+
+/* =========================================================
+   SELECTION
+========================================================= */
+
+function buildBallCards(){
+
+    const query =
+        searchBox.value
+            .trim()
+            .toLowerCase();
+
+    ballSelection.innerHTML = "";
+
+    BALL_ORDER.forEach(
+        (
+            type,
+            index
+        ) => {
+
+            const info =
+                BALL_INFO[type];
+
+            if(
+                query &&
+                !info.name
+                    .toLowerCase()
+                    .includes(query)
+            ){
+                return;
+            }
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+            card.className =
+                "ball-card";
+
+            if(
+                type ===
+                selectedBallType
+            ){
+                card.classList.add(
+                    "selected"
+                );
+            }
+
+            card.innerHTML = `
+                <span class="ball-number">
+                    ${index + 1}
+                </span>
+
+                <div
+                    class="ball-preview"
+                    style="background:${info.color}">
+                </div>
+
+                <div class="ball-name">
+                    ${info.name}
+                </div>
+            `;
+
+            card.addEventListener(
+                "click",
+                () => {
+
+                    if(fightRunning){
+                        return;
+                    }
+
+                    selectedBallType =
+                        type;
+
+                    buildBallCards();
+
+                    updateAbilityInfo();
+
+                    player =
+                        createBall(
+                            selectedBallType,
+                            ARENA_W * .25,
+                            ARENA_H * .5,
+                            true
+                        );
+
+                    enemy =
+                        createBall(
+                            enemyBallType,
+                            ARENA_W * .75,
+                            ARENA_H * .5
+                        );
+
+                    player.vx =
+                        player.vy =
+                        enemy.vx =
+                        enemy.vy = 0;
+
+                    updatePreviewLabels();
+
+                    updateHealthUI();
+                }
+            );
+
+            ballSelection.appendChild(
+                card
+            );
+        }
+    );
+}
+
+function updateAbilityInfo(){
+
+    const info =
+        BALL_INFO[
+            selectedBallType
+        ];
+
+    abilityInfo.innerHTML =
+        `<strong>${info.name}:</strong>
+        ${info.description}
+
+        <div class="tip">
+            Stage 2 — move your mouse to aim.
+            Click the arena to launch both balls.
+            Press Escape to cancel.
+            Press Space or Ultimate when charged.
+        </div>`;
+}
+
+/* =========================================================
+   DAMAGE
+========================================================= */
+
+function getCollisionDamage(ball){
+
+    if(!ball){
+        return DAMAGE;
+    }
+
+    let damage =
+        DAMAGE;
+
+    switch(ball.type){
+
+        case "charge":
+
+            damage =
+                10 +
+                (
+                    ball.chargeStage -
+                    1
+                ) *
+                5;
+
+            break;
+
+        case "berserker":
+
+            damage =
+                10 +
+                ball.rage *
+                2;
+
+            break;
+
+        case "glass":
+
+            damage = 23;
+
+            break;
+
+        case "speedster":
+
+            damage = 8;
+
+            break;
+
+        case "tank":
+
+            damage = 9;
+
+            break;
+
+        case "executioner":{
+
+            damage = 12;
+
+            const target =
+                getOtherBall(ball);
+
+            if(
+                target &&
+                target.hp <=
+                target.maxHp * .25
+            ){
+                damage += 28;
+            }
+
+            break;
+        }
+
+        case "grower":
+
+            damage +=
+                ball.growAmount *
+                1.2;
+
+            break;
+
+        case "boiling":{
+
+            const missing =
+                1 -
+                ball.hp /
+                ball.maxHp;
+
+            damage +=
+                missing * 20;
+
+            break;
+        }
+
+        case "ricochet":
+
+            damage +=
+                ball.ricochetPower;
+
+            break;
+
+        case "roulette":
+
+            damage *=
+                ball.roulettePower;
+
+            break;
+
+        default:
+
+            break;
+    }
+
+    if(ball.isBoss){
+
+        damage = 18;
+    }
+
+    return damage;
+}
+
+function getMovementMultiplier(ball){
+
+    let multiplier = 1;
+
+    if(
+        ball.slowTimer > 0
+    ){
+        multiplier *=
+            ball.slowAmount;
+    }
+
+    if(
+        ball.shrinkTimer > 0
+    ){
+        multiplier *= .9;
+    }
+
+    switch(ball.type){
+
+        case "speedster":
+            multiplier *= 1.25;
+            break;
+
+        case "tank":
+            multiplier *= .72;
+            break;
+
+        case "charge":
+            multiplier *=
+                1 +
+                (
+                    ball.chargeStage -
+                    1
+                ) *
+                .035;
+            break;
+
+        case "berserker":
+            multiplier *=
+                1 +
+                ball.rage *
+                .055;
+            break;
+
+        case "boiling":
+
+            multiplier *=
+                1 +
+                (
+                    1 -
+                    ball.hp /
+                    ball.maxHp
+                ) *
+                .25;
+
+            break;
+    }
+
+    if(
+        ball.rouletteEffect ===
+        "speed"
+    ){
+        multiplier *=
+            1.35;
+    }
+
+    if(
+        ball.rouletteEffect ===
+        "slow"
+    ){
+        multiplier *=
+            .75;
+    }
+
+    if(ball.armorTimer > 0){
+
+        multiplier *=
+            1.05;
+    }
+
+    return multiplier;
+}
+
+function clampBallSpeed(ball){
+
+    /*
+       Never give Stage 2 zero-velocity balls
+       a speed before launch.
+    */
+
+    if(
+        !ball ||
+        aiming ||
+        countdown > 0
+    ){
+        return;
+    }
+
+    let minimum =
+        MIN_SPEED;
+
+    if(
+        ball.type ===
+        "speedster"
+    ){
+        minimum = 215;
+    }
+
+    if(
+        ball.type ===
+        "tank"
+    ){
+        minimum = 120;
+    }
+
+    if(
+        ball.type ===
+        "charge"
+    ){
+        minimum +=
+            (
+                ball.chargeStage -
+                1
+            ) *
+            5;
+    }
+
+    if(
+        ball.type ===
+        "berserker"
+    ){
+        minimum +=
+            ball.rage *
+            8;
+    }
+
+    if(ball.isBoss){
+        minimum = 145;
+    }
+
+    const speed =
+        Math.hypot(
+            ball.vx,
+            ball.vy
+        );
+
+    if(speed < 1){
+
+        const angle =
+            Math.random() *
+            Math.PI *
+            2;
+
+        ball.vx =
+            Math.cos(angle) *
+            minimum;
+
+        ball.vy =
+            Math.sin(angle) *
+            minimum;
+
+    }else if(
+        speed <
+        minimum
+    ){
+
+        const dir =
+            normalize(
+                ball.vx,
+                ball.vy
+            );
+
+        ball.vx =
+            dir.x *
+            minimum;
+
+        ball.vy =
+            dir.y *
+            minimum;
+    }
+
+    const finalSpeed =
+        Math.hypot(
+            ball.vx,
+            ball.vy
+        );
+
+    if(
+        finalSpeed >
+        MAX_SPEED
+    ){
+
+        const scale =
+            MAX_SPEED /
+            finalSpeed;
+
+        ball.vx *=
+            scale;
+
+        ball.vy *=
+            scale;
+    }
+}
+
+/* =========================================================
+   DAMAGE
+========================================================= */
+
+function damageBall(
+    target,
+    amount,
+    attacker = null,
+    collisionDamage = false
+){
+
+    if(
+        !target ||
+        target.dead
+    ){
+        return 0;
+    }
+
+    if(
+        modeSelect.value ===
+        "onehit" &&
+        collisionDamage
+    ){
+        amount =
+            target.hp;
+    }
+
+    if(
+        target.type ===
+        "shield" &&
+        target.shieldActive &&
+        collisionDamage
+    ){
+
+        if(
+            attacker &&
+            !attacker.dead
+        ){
+
+            damageBall(
+                attacker,
+                5,
+                target,
+                false
+            );
+        }
+
+        createHitParticles(
+            target.x,
+            target.y,
+            "#75b8ff",
+            10
+        );
+
+        return 0;
+    }
+
+    if(
+        target.type ===
+        "phase" &&
+        target.phaseActive &&
+        collisionDamage
+    ){
+
+        target.phaseActive =
+            false;
+
+        target.phaseCooldown =
+            3;
+
+        createHitParticles(
+            target.x,
+            target.y,
+            "#d0aaff",
+            10
+        );
+
+        return 0;
+    }
+
+    if(
+        target.type ===
+        "reflector" &&
+        collisionDamage &&
+        attacker &&
+        !attacker.dead
+    ){
+
+        const reflected =
+            amount *
+            .38;
+
+        damageBall(
+            attacker,
+            reflected,
+            target,
+            false
+        );
+
+        amount *= .62;
+    }
+
+    if(
+        target.type ===
+        "tank"
+    ){
+        amount *= .62;
+    }
+
+    if(
+        target.rouletteEffect ===
+        "shield"
+    ){
+        amount *= .45;
+    }
+
+    if(
+        target.armorTimer > 0
+    ){
+        amount *= .58;
+    }
+
+    amount =
+        Math.max(
+            0,
+            amount
+        );
+
+    target.hp -=
+        amount;
+
+    target.ultimate =
+        clamp(
+            target.ultimate +
+            (
+                collisionDamage
+                    ? 10
+                    : 4
+            ),
+            0,
+            100
+        );
+
+    createHitParticles(
+        target.x,
+        target.y,
+        BALL_INFO[
+            target.type
+        ].color,
+        7
+    );
+
+    if(
+        target.hp <= 0
+    ){
+
+        target.hp = 0;
+
+        target.dead = true;
+
+        createExplosion(
+            target.x,
+            target.y,
+            BALL_INFO[
+                target.type
+            ].color,
+            28
+        );
+
+        createScorchMark(
+            target.x,
+            target.y,
+            22
+        );
+
+        if(
+            target.type ===
+            "splitter" &&
+            target.splitStage === 2
+        ){
+
+            splitIntoSmallerBalls(
+                target.x,
+                target.y,
+                target
+            );
+        }
+    }
+
+    return amount;
+}
+
+/* =========================================================
+   HIT EFFECTS
+========================================================= */
+
+function onSuccessfulBallHit(
+    attacker,
+    target,
+    damage
+){
+
+    if(
+        !attacker ||
+        !target
+    ){
+        return;
+    }
+
+    attacker.combo =
+        (
+            attacker.combo ||
+            0
+        ) +
+        1;
+
+    attacker.comboTimer =
+        1.5;
+
+    attacker.ultimate =
+        clamp(
+            attacker.ultimate +
+            8,
+            0,
+            100
+        );
+
+    if(
+        attacker.type ===
+        "vampire"
+    ){
+
+        attacker.hp =
+            Math.min(
+                attacker.maxHp,
+                attacker.hp +
+                damage *
+                .42
+            );
+    }
+
+    if(
+        attacker.type ===
+        "freeze"
+    ){
+
+        target.slowTimer =
+            1.6;
+
+        target.slowAmount =
+            .48;
+    }
+
+    if(
+        attacker.type ===
+        "burn"
+    ){
+
+        target.burnTimer =
+            3;
+
+        target.burnTickTimer =
+            0;
+    }
+
+    if(
+        attacker.type ===
+        "shrinker"
+    ){
+
+        target.shrinkTimer =
+            3.5;
+
+        target.shrinkAmount =
+            .72;
+    }
+
+    if(
+        attacker.type ===
+        "grower"
+    ){
+
+        attacker.growAmount =
+            Math.min(
+                12,
+                attacker.growAmount +
+                1
+            );
+
+        attacker.radius =
+            BALL_RADIUS +
+            attacker.growAmount;
+    }
+
+    if(
+        attacker.type ===
+        "thorns"
+    ){
+
+        damageBall(
+            attacker,
+            5,
+            target,
+            false
+        );
+    }
+
+    if(
+        attacker.type ===
+        "doublehit" &&
+        attacker.doubleHitCooldown <= 0
+    ){
+
+        attacker.doubleHitCooldown =
+            .6;
+
+        setTimeout(
+            () => {
+
+                if(
+                    attacker &&
+                    target &&
+                    !attacker.dead &&
+                    !target.dead
+                ){
+
+                    damageBall(
+                        target,
+                        6,
+                        attacker,
+                        false
+                    );
+
+                    createHitParticles(
+                        target.x,
+                        target.y,
+                        "#ffbd59",
+                        8
+                    );
+                }
+
+            },
+            90
+        );
+    }
+
+    /*
+       Splitter's main Stage 2 form
+       splits when it dies rather than
+       on every collision.
+    */
+}
+
+/* =========================================================
+   BALL COLLISION
+========================================================= */
+
+function handleBallCollision(
+    a,
+    b
+){
+
+    if(
+        !a ||
+        !b ||
+        a.dead ||
+        b.dead ||
+        aiming ||
+        countdown > 0
+    ){
+        return;
+    }
+
+    const dx =
+        b.x -
+        a.x;
+
+    const dy =
+        b.y -
+        a.y;
+
+    const dist =
+        Math.hypot(
+            dx,
+            dy
+        );
+
+    const minDist =
+        a.radius +
+        b.radius;
+
+    if(
+        dist >=
+        minDist
+    ){
+        return;
+    }
+
+    const normal =
+        normalize(
+            dx,
+            dy
+        );
+
+    const overlap =
+        minDist -
+        dist;
+
+    a.x -=
+        normal.x *
+        overlap *
+        .5;
+
+    a.y -=
+        normal.y *
+        overlap *
+        .5;
+
+    b.x +=
+        normal.x *
+        overlap *
+        .5;
+
+    b.y +=
+        normal.y *
+        overlap *
+        .5;
+
+    const relativeVelocity =
+        (
+            b.vx -
+            a.vx
+        ) *
+        normal.x +
+        (
+            b.vy -
+            a.vy
+        ) *
+        normal.y;
+
+    if(
+        relativeVelocity <
+        0
+    ){
+
+        const impulse =
+            -relativeVelocity *
+            1.15;
+
+        a.vx -=
+            normal.x *
+            impulse;
+
+        a.vy -=
+            normal.y *
+            impulse;
+
+        b.vx +=
+            normal.x *
+            impulse;
+
+        b.vy +=
+            normal.y *
+            impulse;
+    }
+
+    /*
+       Charge ONLY resets from
+       direct ball-to-ball collision.
+    */
+
+    if(
+        a.type ===
+        "charge"
+    ){
+
+        a.chargeStage =
+            1;
+
+        a.chargeTimer =
+            0;
+    }
+
+    if(
+        b.type ===
+        "charge"
+    ){
+
+        b.chargeStage =
+            1;
+
+        b.chargeTimer =
+            0;
+    }
+
+    if(
+        a.hitCooldown <= 0 &&
+        b.hitCooldown <= 0
+    ){
+
+        const damageToB =
+            getCollisionDamage(a);
+
+        const damageToA =
+            getCollisionDamage(b);
+
+        const dealtToB =
+            damageBall(
+                b,
+                damageToB,
+                a,
+                true
+            );
+
+        const dealtToA =
+            damageBall(
+                a,
+                damageToA,
+                b,
+                true
+            );
+
+        a.hitCooldown =
+            .22;
+
+        b.hitCooldown =
+            .22;
+
+        onSuccessfulBallHit(
+            a,
+            b,
+            dealtToB
+        );
+
+        onSuccessfulBallHit(
+            b,
+            a,
+            dealtToA
+        );
+
+        if(
+            a.type ===
+            "berserker"
+        ){
+
+            a.rage =
+                Math.min(
+                    5,
+                    a.rage +
+                    1
+                );
+        }
+
+        if(
+            b.type ===
+            "berserker"
+        ){
+
+            b.rage =
+                Math.min(
+                    5,
+                    b.rage +
+                    1
+                );
+        }
+
+        createImpactBurst(
+            (
+                a.x +
+                b.x
+            ) /
+            2,
+            (
+                a.y +
+                b.y
+            ) /
+            2
+        );
+    }
+
+    clampBallSpeed(a);
+    clampBallSpeed(b);
+}
+
+/* =========================================================
+   SPIKES
+========================================================= */
+
+function placeSpikeAtBorder(
+    ball,
+    side
+){
+
+    if(
+        ball.type !== "spike" &&
+        ball.type !== "poison"
+    ){
+        return;
+    }
+
+    if(
+        ball.spikeCooldown >
+        0
+    ){
+        return;
+    }
+
+    let x;
+    let y;
+    let rotation;
+
+    if(side === "top"){
+
+        x =
+            clamp(
+                ball.x,
+                18,
+                ARENA_W -
+                18
+            );
+
+        y = 13;
+
+        rotation =
+            Math.PI / 2;
+
+    }else if(
+        side ===
+        "bottom"
+    ){
+
+        x =
+            clamp(
+                ball.x,
+                18,
+                ARENA_W -
+                18
+            );
+
+        y =
+            ARENA_H -
+            13;
+
+        rotation =
+            -Math.PI / 2;
+
+    }else if(
+        side ===
+        "left"
+    ){
+
+        x = 13;
+
+        y =
+            clamp(
+                ball.y,
+                18,
+                ARENA_H -
+                18
+            );
+
+        rotation = 0;
+
+    }else{
+
+        x =
+            ARENA_W -
+            13;
+
+        y =
+            clamp(
+                ball.y,
+                18,
+                ARENA_H -
+                18
+            );
+
+        rotation =
+            Math.PI;
+    }
+
+    for(
+        const spike of spikes
+    ){
+
+        if(
+            Math.hypot(
+                spike.x - x,
+                spike.y - y
+            ) < 42
+        ){
+            return;
+        }
+    }
+
+    spikes.push({
+        x,
+        y,
+        rotation,
+        owner:ball,
+        level:1,
+        poison:
+            ball.type === "poison"
+    });
+
+    ball.spikeCooldown =
+        SPIKE_PLACEMENT_COOLDOWN;
+
+    createHitParticles(
+        x,
+        y,
+        ball.type === "poison"
+            ? "#6be45f"
+            : "#e5e9ef",
+        5
+    );
+}
+
+function handleWallCollision(
+    ball
+){
+
+    const r =
+        ball.radius;
+
+    let hitX = false;
+    let hitY = false;
+
+    if(
+        ball.x -
+        r <=
+        WALL_PADDING
+    ){
+
+        ball.x =
+            WALL_PADDING +
+            r;
+
+        ball.vx =
+            Math.abs(
+                ball.vx
+            );
+
+        hitX = true;
+
+        placeSpikeAtBorder(
+            ball,
+            "left"
+        );
+
+    }else if(
+        ball.x +
+        r >=
+        ARENA_W -
+        WALL_PADDING
+    ){
+
+        ball.x =
+            ARENA_W -
+            WALL_PADDING -
+            r;
+
+        ball.vx =
+            -Math.abs(
+                ball.vx
+            );
+
+        hitX = true;
+
+        placeSpikeAtBorder(
+            ball,
+            "right"
+        );
+    }
+
+    if(
+        ball.y -
+        r <=
+        WALL_PADDING
+    ){
+
+        ball.y =
+            WALL_PADDING +
+            r;
+
+        ball.vy =
+            Math.abs(
+                ball.vy
+            );
+
+        hitY = true;
+
+        placeSpikeAtBorder(
+            ball,
+            "top"
+        );
+
+    }else if(
+        ball.y +
+        r >=
+        ARENA_H -
+        WALL_PADDING
+    ){
+
+        ball.y =
+            ARENA_H -
+            WALL_PADDING -
+            r;
+
+        ball.vy =
+            -Math.abs(
+                ball.vy
+            );
+
+        hitY = true;
+
+        placeSpikeAtBorder(
+            ball,
+            "bottom"
+        );
+    }
+
+    if(
+        hitX ||
+        hitY
+    ){
+
+        if(
+            ball.type ===
+            "ricochet"
+        ){
+
+            ball.ricochetPower =
+                Math.min(
+                    18,
+                    ball.ricochetPower +
+                    2
+                );
+        }
+
+        if(
+            ball.type ===
+            "bouncer"
+        ){
+
+            ball.vx *=
+                1.15;
+
+            ball.vy *=
+                1.15;
+
+            ball.armorTimer =
+                1.6;
+
+            createHitParticles(
+                ball.x,
+                ball.y,
+                "#f1c15b",
+                10
+            );
+        }
+
+        if(
+            ball.type ===
+            "wallmaker"
+        ){
+
+            createWallStructure(
+                ball,
+                hitX,
+                hitY
+            );
+        }
+
+        if(
+            ball.type ===
+            "poisoncloud"
+        ){
+
+            createHazard(
+                ball.x,
+                ball.y,
+                48,
+                5,
+                "poison",
+                ball
+            );
+        }
+
+        if(
+            ball.type ===
+            "icetrail"
+        ){
+
+            createHazard(
+                ball.x,
+                ball.y,
+                52,
+                4,
+                "ice",
+                ball
+            );
+        }
+
+        if(
+            ball.type ===
+            "crystal"
+        ){
+
+            createCrystal(
+                ball
+            );
+        }
+
+        createImpactBurst(
+            ball.x,
+            ball.y
+        );
+    }
+}
+
+/* =========================================================
+   SPIKE COLLISION
+========================================================= */
+
+function handleSpikeCollision(
+    ball
+){
+
+    for(
+        const spike of spikes
+    ){
+
+        if(
+            !spike.owner ||
+            spike.owner.dead
+        ){
+            continue;
+        }
+
+        const d =
+            Math.hypot(
+                ball.x -
+                spike.x,
+                ball.y -
+                spike.y
+            );
+
+        if(
+            d >
+            ball.radius +
+            15
+        ){
+            continue;
+        }
+
+        if(
+            ball.hitCooldown >
+            0
+        ){
+            continue;
+        }
+
+        if(
+            spike.owner ===
+            ball
+        ){
+
+            spike.level =
+                Math.min(
+                    5,
+                    spike.level +
+                    1
+                );
+
+            const dir =
+                normalize(
+                    ball.x -
+                    spike.x,
+                    ball.y -
+                    spike.y
+                );
+
+            ball.vx +=
+                dir.x *
+                65;
+
+            ball.vy +=
+                dir.y *
+                65;
+
+            continue;
+        }
+
+        const damage =
+            8 +
+            spike.level *
+            4;
+
+        damageBall(
+            ball,
+            damage,
+            spike.owner,
+            false
+        );
+
+        if(
+            spike.poison
+        ){
+
+            ball.poisonTimer =
+                3;
+
+            ball.poisonTickTimer =
+                0;
+        }
+
+        const dir =
+            normalize(
+                ball.x -
+                spike.x,
+                ball.y -
+                spike.y
+            );
+
+        ball.vx +=
+            dir.x *
+            100;
+
+        ball.vy +=
+            dir.y *
+            100;
+
+        ball.hitCooldown =
+            .22;
+    }
+}
+
+/* =========================================================
+   EXPLOSION
+========================================================= */
+
+function createExplosion(
+    x,
+    y,
+    color,
+    radius = 45,
+    owner = null
+){
+
+    particles.push({
+        type:"explosion",
+        x,
+        y,
+        radius:5,
+        maxRadius:radius,
+        life:.35,
+        maxLife:.35,
+        color
+    });
+
+    if(owner){
+
+        for(
+            const target of
+            [player,enemy]
+        ){
+
+            if(
+                !target ||
+                target === owner ||
+                target.dead
+            ){
+                continue;
+            }
+
+            const d =
+                Math.hypot(
+                    target.x -
+                    x,
+                    target.y -
+                    y
+                );
+
+            if(
+                d <
+                radius
+            ){
+
+                const falloff =
+                    1 -
+                    d /
+                    radius;
+
+                damageBall(
+                    target,
+                    14 *
+                    falloff,
+                    owner,
+                    false
+                );
+
+                const dir =
+                    normalize(
+                        target.x -
+                        x,
+                        target.y -
+                        y
+                    );
+
+                target.vx +=
+                    dir.x *
+                    100;
+
+                target.vy +=
+                    dir.y *
+                    100;
+            }
+        }
+    }
+}
+
+/* =========================================================
+   SPLITTER SYSTEM
+========================================================= */
+
+/*
+   Main Splitter = Stage 2.
+
+   When it dies:
+       -> 2 or 3 Stage 1 balls.
+
+   Stage 1:
+       -> smaller
+       -> never splits if killed
+       -> survives for a while
+       -> grows into Stage 2
+
+   Stage 2:
+       -> larger
+       -> if killed, splits again
+*/
+
+function splitIntoSmallerBalls(
+    x,
+    y,
+    parent
+){
+
+    const count =
+        Math.random() < .5
+            ? 2
+            : 3;
+
+    createHitParticles(
+        x,
+        y,
+        "#ffdd67",
+        18
+    );
+
+    for(
+        let i = 0;
+        i < count;
+        i++
+    ){
+
+        const angle =
+            (
+                i /
+                count
+            ) *
+            Math.PI *
+            2 +
+            randomRange(
+                -.25,
+                .25
+            );
+
+        minions.push({
+
+            type:"split",
+
+            stage:1,
+
+            x,
+
+            y,
+
+            vx:
+                Math.cos(angle) *
+                165,
+
+            vy:
+                Math.sin(angle) *
+                165,
+
+            radius:11,
+
+            life:5,
+
+            matureTimer:
+                randomRange(
+                    3.2,
+                    4.8
+                ),
+
+            parent:
+
+                parent &&
+                parent.isPlayer
+                    ? player
+                    : enemy,
+
+            canSplit:false,
+
+            splitTriggered:false
+        });
+    }
+}
+
+/* =========================================================
+   OTHER OBJECT CREATION
+========================================================= */
+
+function createWallStructure(
+    ball,
+    horizontal,
+    vertical
+){
+
+    structures.push({
+        type:"wall",
+        owner:ball,
+        x:ball.x,
+        y:ball.y,
+        width:
+            horizontal
+                ? 72
+                : 14,
+        height:
+            vertical
+                ? 72
+                : 14,
+        life:5
+    });
+}
+
+function createTurret(
+    ball
+){
+
+    structures.push({
+        type:"turret",
+        owner:ball,
+        x:ball.x,
+        y:ball.y,
+        life:8,
+        fireTimer:.2
+    });
+}
+
+function createCrystal(
+    ball
+){
+
+    structures.push({
+        type:"crystal",
+        owner:ball,
+        x:clamp(
+            ball.x,
+            20,
+            ARENA_W -
+            20
+        ),
+        y:clamp(
+            ball.y,
+            20,
+            ARENA_H -
+            20
+        ),
+        life:10,
+        fireTimer:.8
+    });
+}
+
+function createHazard(
+    x,
+    y,
+    radius,
+    life,
+    type,
+    owner
+){
+
+    hazards.push({
+        x,
+        y,
+        radius,
+        life,
+        maxLife:life,
+        type,
+        owner
+    });
+}
+
+function createProjectile(
+    x,
+    y,
+    vx,
+    vy,
+    owner,
+    type
+){
+
+    projectiles.push({
+
+        x,
+        y,
+
+        vx,
+        vy,
+
+        owner,
+
+        type,
+
+        life:3,
+
+        radius:
+            type === "homing"
+                ? 7
+                : type ===
+                    "boomerang"
+                    ? 8
+                    : 6,
+
+        returning:false,
+
+        damage:
+            type === "homing"
+                ? 8
+                : type ===
+                    "boomerang"
+                    ? 12
+                    : type ===
+                        "boss"
+                        ? 12
+                        : 9
+    });
+}
+
+/* =========================================================
+   ABILITIES
+========================================================= */
+
+function updateSpecialAbility(
+    ball,
+    dt
+){
+
+    if(
+        !ball ||
+        ball.dead
+    ){
+        return;
+    }
+
+    ball.abilityTimer -=
+        dt;
+
+    ball.abilityTimer2 -=
+        dt;
+
+    ball.doubleHitCooldown =
+        Math.max(
+            0,
+            ball.doubleHitCooldown -
+            dt
+        );
+
+    ball.armorTimer =
+        Math.max(
+            0,
+            ball.armorTimer -
+            dt
+        );
+
+    /* CHARGE */
+
+    if(
+        ball.type ===
+        "charge"
+    ){
+
+        ball.chargeTimer +=
+            dt;
+
+        if(
+            ball.chargeTimer >=
+                1.5 &&
+            ball.chargeStage <
+                5
+        ){
+
+            ball.chargeTimer = 0;
+
+            ball.chargeStage++;
+        }
+    }
+
+    /* SHIELD */
+
+    if(
+        ball.type ===
+        "shield"
+    ){
+
+        if(
+            ball.shieldActive
+        ){
+
+            ball.shieldTimer -=
+                dt;
+
+            if(
+                ball.shieldTimer <=
+                0
+            ){
+
+                ball.shieldActive =
+                    false;
+
+                ball.shieldCooldown =
+                    4;
+            }
+
+        }else{
+
+            ball.shieldCooldown -=
+                dt;
+
+            if(
+                ball.shieldCooldown <=
+                0
+            ){
+
+                ball.shieldActive =
+                    true;
+
+                ball.shieldTimer =
+                    1.5;
+            }
+        }
+    }
+
+    /* MAGNET */
+
+    if(
+        ball.type ===
+        "magnet" &&
+        ball.abilityTimer <=
+        0
+    ){
+
+        const target =
+            getOtherBall(ball);
+
+        if(
+            target &&
+            !target.dead
+        ){
+
+            const dir =
+                normalize(
+                    ball.x -
+                    target.x,
+                    ball.y -
+                    target.y
+                );
+
+            target.vx +=
+                dir.x *
+                145;
+
+            target.vy +=
+                dir.y *
+                145;
+
+            createHitParticles(
+                target.x,
+                target.y,
+                "#d14cff",
+                10
+            );
+        }
+
+        ball.abilityTimer =
+            2.2;
+    }
+
+    /* DASH */
+
+    if(
+        ball.type ===
+        "dash" &&
+        ball.abilityTimer <=
+        0
+    ){
+
+        const dir =
+            normalize(
+                ball.vx,
+                ball.vy
+            );
+
+        ball.vx +=
+            dir.x *
+            230;
+
+        ball.vy +=
+            dir.y *
+            230;
+
+        createHitParticles(
+            ball.x,
+            ball.y,
+            "#4ce1ff",
+            12
+        );
+
+        ball.abilityTimer =
+            2.7;
+    }
+
+    /* HEALER */
+
+    if(
+        ball.type ===
+        "healer" &&
+        ball.abilityTimer <=
+        0
+    ){
+
+        ball.hp =
+            Math.min(
+                ball.maxHp,
+                ball.hp +
+                2.5
+            );
+
+        createHitParticles(
+            ball.x,
+            ball.y,
+            "#55ef91",
+            5
+        );
+
+        ball.abilityTimer =
+            .8;
+    }
+
+    /* LIGHTNING */
+
+    if(
+        ball.type ===
+        "lightning" &&
+        ball.abilityTimer <=
+        0
+    ){
+
+        const target =
+            getOtherBall(ball);
+
+        if(
+            target &&
+            !target.dead
+        ){
+
+            damageBall(
+                target,
+                15,
+                ball,
+                false
+            );
+
+            createExplosion(
+                target.x,
+                target.y,
+                "#f5e45b",
+                28,
+                ball
+            );
+        }
+
+        ball.abilityTimer =
+            3.4;
+    }
+
+    /* TELEPORTER */
+
+    if(
+        ball.type ===
+        "teleporter" &&
+        ball.abilityTimer <=
+        0
+    ){
+
+        ball.x =
+            randomRange(
+                50,
+                ARENA_W -
+                50
+            );
+
+        ball.y =
+            randomRange(
+                50,
+                ARENA_H -
+                50
+            );
+
+        ball.vx =
+            randomRange(
+                -1,
+                1
+            );
+
+        ball.vy =
+            randomRange(
+                -1,
+                1
+            );
+
+        createHitParticles(
+            ball.x,
+            ball.y,
+            "#9b72ff",
+            16
+        );
+
+        ball.abilityTimer =
+            4;
+    }
+
+    /* GRAVITY */
+
+    if(
+        ball.type ===
+        "gravity"
+    ){
+
+        const target =
+            getOtherBall(ball);
+
+        if(
+            target &&
+            !target.dead
+        ){
+
+            const d =
+                distance(
+                    ball,
+                    target
+                );
+
+            if(
+                d <
+                180
+            ){
+
+                const dir =
+                    normalize(
+                        ball.x -
+                        target.x,
+                        ball.y -
+                        target.y
+                    );
+
+                const strength =
+                    (
+                        1 -
+                        d /
+                        180
+                    ) *
+                    85;
+
+                target.vx +=
+                    dir.x *
+                    strength *
+                    dt;
+
+                target.vy +=
+                    dir.y *
+                    strength *
+                    dt;
+            }
+        }
+    }
+
+    /* TURRET */
+
+    if(
+        ball.type ===
+        "turret" &&
+        ball.abilityTimer <=
+        0
+    ){
+
+        createTurret(ball);
+
+        ball.abilityTimer =
+            5;
+    }
+
+    /* DRONE */
+
+    if(
+        ball.type ===
+        "drone" &&
+        ball.abilityTimer <=
+        0
+    ){
+
+        const exists =
+            minions.some(
+                m =>
+                    m.type ===
+                    "drone" &&
+                    m.parent ===
+                    ball
+            );
+
+        if(!exists){
+
+            minions.push({
+                type:"drone",
+                parent:ball,
+                angle:
+                    ball.droneAngle,
+                life:999
+            });
+        }
+
+        ball.abilityTimer =
+            999;
+    }
+
+    /* HOMING */
+
+    if(
+        ball.type ===
+        "homing" &&
+        ball.abilityTimer <=
+        0
+    ){
+
+        const target =
+            getOtherBall(ball);
+
+        if(
+            target &&
+            !target.dead
+        ){
+
+            const dir =
+                normalize(
+                    target.x -
+                    ball.x,
+                    target.y -
+                    ball.y
+                );
+
+            createProjectile(
+                ball.x,
+                ball.y,
+                dir.x *
+                    230,
+                dir.y *
+                    230,
+                ball,
+                "homing"
+            );
+        }
+
+        ball.abilityTimer =
+            2;
+    }
+
+    /* BOOMERANG */
+
+    if(
+        ball.type ===
+        "boomerang" &&
+        ball.abilityTimer <=
+        0
+    ){
+
+        const dir =
+            normalize(
+                ball.vx,
+                ball.vy
+            );
+
+        createProjectile(
+            ball.x,
+            ball.y,
+            dir.x *
+                260,
+            dir.y *
+                260,
+            ball,
+            "boomerang"
+        );
+
+        ball.abilityTimer =
+            3;
+    }
+
+    /* TIMEKEEPER */
+
+    if(
+        ball.type ===
+        "timekeeper"
+    ){
+
+        const target =
+            getOtherBall(ball);
+
+        if(
+            target &&
+            distance(
+                ball,
+                target
+            ) <
+            125
+        ){
+
+            target.slowTimer =
+                .2;
+
+            target.slowAmount =
+                .45;
+        }
+    }
+
+    /* ORBITALS */
+
+    if(
+        ball.type ===
+        "orbitals"
+    ){
+
+        ball.orbitalAngle +=
+            dt *
+            2.2;
+
+        if(
+            ball.abilityTimer <=
+            0
+        ){
+
+            const target =
+                getOtherBall(ball);
+
+            if(
+                target &&
+                !target.dead
+            ){
+
+                for(
+                    let i = 0;
+                    i < 3;
+                    i++
+                ){
+
+                    const angle =
+                        ball.orbitalAngle +
+                        i *
+                        Math.PI *
+                        2 /
+                        3;
+
+                    const ox =
+                        ball.x +
+                        Math.cos(angle) *
+                        47;
+
+                    const oy =
+                        ball.y +
+                        Math.sin(angle) *
+                        47;
+
+                    if(
+                        Math.hypot(
+                            target.x -
+                            ox,
+                            target.y -
+                            oy
+                        ) <
+                        target.radius +
+                        12
+                    ){
+
+                        damageBall(
+                            target,
+                            7,
+                            ball,
+                            false
+                        );
+                    }
+                }
+            }
+
+            ball.abilityTimer =
+                .18;
+        }
+    }
+
+    /* FIRE RING */
+
+    if(
+        ball.type ===
+        "firering" &&
+        ball.abilityTimer <=
+        0
+    ){
+
+        particles.push({
+
+            type:"ring",
+
+            x:ball.x,
+
+            y:ball.y,
+
+            radius:
+                ball.radius,
+
+            maxRadius:130,
+
+            life:.65,
+
+            maxLife:.65,
+
+            owner:ball,
+
+            color:"#ff7540",
+
+            hit:false
+        });
+
+        ball.abilityTimer =
+            2.7;
+    }
+
+    /* SHOCKWAVE */
+
+    if(
+        ball.type ===
+        "shockwave" &&
+        ball.abilityTimer <=
+        0
+    ){
+
+        const target =
+            getOtherBall(ball);
+
+        if(
+            target &&
+            !target.dead
+        ){
+
+            const d =
+                distance(
+                    ball,
+                    target
+                );
+
+            if(
+                d <
+                190
+            ){
+
+                const dir =
+                    normalize(
+                        target.x -
+                        ball.x,
+                        target.y -
+                        ball.y
+                    );
+
+                target.vx +=
+                    dir.x *
+                    260;
+
+                target.vy +=
+                    dir.y *
+                    260;
+
+                damageBall(
+                    target,
+                    9,
+                    ball,
+                    false
+                );
+            }
+        }
+
+        particles.push({
+
+            type:"ring",
+
+            x:ball.x,
+
+            y:ball.y,
+
+            radius:20,
+
+            maxRadius:190,
+
+            life:.45,
+
+            maxLife:.45,
+
+            owner:ball,
+
+            color:"#8b9fff",
+
+            hit:true
+        });
+
+        ball.abilityTimer =
+            2.8;
+    }
+
+    /* CLONE */
+
+    if(
+        ball.type ===
+        "clone" &&
+        ball.hp <=
+        ball.maxHp *
+        .35 &&
+        !ball.cloneCreated
+    ){
+
+        ball.cloneCreated =
+            true;
+
+        minions.push({
+
+            type:"clone",
+
+            parent:ball,
+
+            x:
+                ball.x +
+                30,
+
+            y:
+                ball.y +
+                20,
+
+            vx:
+                -ball.vx,
+
+            vy:
+                -ball.vy,
+
+            radius:17,
+
+            life:5
+        });
+
+        createHitParticles(
+            ball.x,
+            ball.y,
+            "#aa8cff",
+            18
+        );
+    }
+
+    /* MINE LAYER */
+
+    if(
+        ball.type ===
+        "minelayer" &&
+        ball.abilityTimer <=
+        0
+    ){
+
+        hazards.push({
+
+            x:ball.x,
+
+            y:ball.y,
+
+            radius:10,
+
+            life:8,
+
+            maxLife:8,
+
+            type:"mine",
+
+            owner:ball
+        });
+
+        ball.abilityTimer =
+            1.8;
+    }
+
+    /* WEBBER */
+
+    if(
+        ball.type ===
+        "webber" &&
+        ball.abilityTimer <=
+        0
+    ){
+
+        createHazard(
+            ball.x,
+            ball.y,
+            45,
+            3.5,
+            "web",
+            ball
+        );
+
+        ball.abilityTimer =
+            1.7;
+    }
+
+    /* PHASE */
+
+    if(
+        ball.type ===
+        "phase"
+    ){
+
+        if(
+            ball.phaseActive
+        ){
+
+            ball.phaseTimer -=
+                dt;
+
+            if(
+                ball.phaseTimer <=
+                0
+            ){
+
+                ball.phaseActive =
+                    false;
+            }
+
+        }else{
+
+            ball.phaseCooldown -=
+                dt;
+
+            if(
+                ball.phaseCooldown <=
+                0
+            ){
+
+                ball.phaseActive =
+                    true;
+
+                ball.phaseTimer =
+                    1.1;
+
+                ball.phaseCooldown =
+                    4;
+            }
+        }
+    }
+
+    /* ROULETTE */
+
+    if(
+        ball.type ===
+        "roulette"
+    ){
+
+        ball.rouletteTimer -=
+            dt;
+
+        if(
+            ball.rouletteTimer <=
+            0
+        ){
+
+            const effects = [
+                "damage",
+                "speed",
+                "shield",
+                "slow"
+            ];
+
+            ball.rouletteEffect =
+                effects[
+                    Math.floor(
+                        Math.random() *
+                        effects.length
+                    )
+                ];
+
+            ball.roulettePower =
+                ball.rouletteEffect ===
+                "damage"
+                    ? 1.6
+                    : 1;
+
+            ball.rouletteEffectTimer =
+                4;
+
+            ball.rouletteTimer =
+                5;
+
+            createHitParticles(
+                ball.x,
+                ball.y,
+                "#ff72a7",
+                15
+            );
+        }
+
+        if(
+            ball.rouletteEffectTimer >
+            0
+        ){
+
+            ball.rouletteEffectTimer -=
+                dt;
+
+            if(
+                ball.rouletteEffectTimer <=
+                0
+            ){
+
+                ball.rouletteEffect =
+                    "none";
+
+                ball.roulettePower =
+                    1;
+            }
+        }
+    }
+
+    /* BOSS */
+
+    if(
+        ball.isBoss &&
+        ball.abilityTimer <=
+        0
+    ){
+
+        const target =
+            getOtherBall(ball);
+
+        if(
+            target &&
+            !target.dead
+        ){
+
+            const angle =
+                Math.atan2(
+                    target.y -
+                    ball.y,
+                    target.x -
+                    ball.x
+                );
+
+            for(
+                let i = -1;
+                i <= 1;
+                i++
+            ){
+
+                createProjectile(
+                    ball.x,
+                    ball.y,
+                    Math.cos(
+                        angle +
+                        i *
+                        .18
+                    ) *
+                    235,
+                    Math.sin(
+                        angle +
+                        i *
+                        .18
+                    ) *
+                    235,
+                    ball,
+                    "boss"
+                );
+            }
+        }
+
+        ball.abilityTimer =
+            1.8;
+    }
+}
+
+/* =========================================================
+   UPDATE BALL
+========================================================= */
+
+function updateBall(
+    ball,
+    dt
+){
+
+    if(
+        !ball ||
+        ball.dead
+    ){
+        return;
+    }
+
+    /*
+       Direction stage:
+       BOTH balls completely frozen.
+    */
+
+    if(
+        aiming
+    ){
+        return;
+    }
+
+    if(
+        countdown >
+        0
+    ){
+        return;
+    }
+
+    ball.hitCooldown =
+        Math.max(
+            0,
+            ball.hitCooldown -
+            dt
+        );
+
+    ball.spikeCooldown =
+        Math.max(
+            0,
+            ball.spikeCooldown -
+            dt
+        );
+
+    if(
+        ball.poisonTimer >
+        0
+    ){
+
+        ball.poisonTimer -=
+            dt;
+
+        ball.poisonTickTimer -=
+            dt;
+
+        if(
+            ball.poisonTickTimer <=
+            0
+        ){
+
+            damageBall(
+                ball,
+                3,
+                null,
+                false
+            );
+
+            ball.poisonTickTimer =
+                .5;
+        }
+    }
+
+    if(
+        ball.burnTimer >
+        0
+    ){
+
+        ball.burnTimer -=
+            dt;
+
+        ball.burnTickTimer -=
+            dt;
+
+        if(
+            ball.burnTickTimer <=
+            0
+        ){
+
+            damageBall(
+                ball,
+                4,
+                null,
+                false
+            );
+
+            ball.burnTickTimer =
+                .5;
+        }
+    }
+
+    if(
+        ball.slowTimer >
+        0
+    ){
+
+        ball.slowTimer -=
+            dt;
+    }
+
+    if(
+        ball.shrinkTimer >
+        0
+    ){
+
+        ball.shrinkTimer -=
+            dt;
+
+        if(
+            ball.shrinkTimer <=
+            0
+        ){
+
+            ball.shrinkAmount =
+                1;
+        }
+    }
+
+    if(
+        ball.comboTimer >
+        0
+    ){
+
+        ball.comboTimer -=
+            dt;
+
+    }else{
+
+        ball.combo = 0;
+    }
+
+    updateSpecialAbility(
+        ball,
+        dt
+    );
+
+    const multiplier =
+        getMovementMultiplier(
+            ball
+        );
+
+    ball.x +=
+        ball.vx *
+        multiplier *
+        dt;
+
+    ball.y +=
+        ball.vy *
+        multiplier *
+        dt;
+
+    handleWallCollision(
+        ball
+    );
+
+    handleSpikeCollision(
+        ball
+    );
+
+    clampBallSpeed(
+        ball
+    );
+}
+
+/* =========================================================
+   BETTER AI
+========================================================= */
+
+function updateEnemyAI(
+    dt
+){
+
+    if(
+        !enemy ||
+        enemy.dead ||
+        !player ||
+        player.dead ||
+        aiming ||
+        countdown > 0
+    ){
+        return;
+    }
+
+    aiTimer -=
+        dt;
+
+    if(
+        aiTimer > 0
+    ){
+        return;
+    }
+
+    const difficulty =
+        DIFFICULTY[
+            difficultySelect.value
+        ] ||
+        1;
+
+    aiTimer =
+        randomRange(
+            .22,
+            .45
+        ) /
+        difficulty;
+
+    const dx =
+        player.x -
+        enemy.x;
+
+    const dy =
+        player.y -
+        enemy.y;
+
+    const distanceToPlayer =
+        Math.hypot(
+            dx,
+            dy
+        );
+
+    let desiredX = dx;
+
+    let desiredY = dy;
+
+    /*
+       Different difficulty levels
+       give the AI different behavior.
+    */
+
+    if(
+        difficultySelect.value ===
+        "easy"
+    ){
+
+        desiredX +=
+            randomRange(
+                -80,
+                80
+            );
+
+        desiredY +=
+            randomRange(
+                -80,
+                80
+            );
+
+    }else if(
+        difficultySelect.value ===
+        "normal"
+    ){
+
+        desiredX +=
+            randomRange(
+                -35,
+                35
+            );
+
+        desiredY +=
+            randomRange(
+                -35,
+                35
+            );
+
+    }else if(
+        difficultySelect.value ===
+        "hard"
+    ){
+
+        desiredX +=
+            randomRange(
+                -15,
+                15
+            );
+
+        desiredY +=
+            randomRange(
+                -15,
+                15
+            );
+
+    }else{
+
+        desiredX +=
+            randomRange(
+                -6,
+                6
+            );
+
+        desiredY +=
+            randomRange(
+                -6,
+                6
+            );
+    }
+
+    /*
+       Some balls prefer different distances.
+    */
+
+    if(
+        enemy.type ===
+        "homing" ||
+        enemy.type ===
+        "crystal"
+    ){
+
+        if(
+            distanceToPlayer <
+            170
+        ){
+
+            desiredX =
+                -dx;
+
+            desiredY =
+                -dy;
+        }
+    }
+
+    if(
+        enemy.type ===
+        "tank"
+    ){
+
+        if(
+            distanceToPlayer >
+            100
+        ){
+
+            desiredX =
+                dx;
+
+            desiredY =
+                dy;
+        }
+    }
+
+    const dir =
+        normalize(
+            desiredX,
+            desiredY
+        );
+
+    const speed =
+        Math.max(
+            LAUNCH_SPEED,
+            Math.hypot(
+                enemy.vx,
+                enemy.vy
+            )
+        );
+
+    enemy.vx +=
+        (
+            dir.x *
+            speed -
+            enemy.vx
+        ) *
+        .35;
+
+    enemy.vy +=
+        (
+            dir.y *
+            speed -
+            enemy.vy
+        ) *
+        .35;
+}
+
+/* =========================================================
+   HAZARDS
+========================================================= */
+
+function updateHazards(
+    dt
+){
+
+    for(
+        let i =
+            hazards.length -
+            1;
+        i >= 0;
+        i--
+    ){
+
+        const h =
+            hazards[i];
+
+        h.life -=
+            dt;
+
+        if(
+            h.type ===
+            "mine"
+        ){
+
+            const target =
+                h.owner ===
+                player
+                    ? enemy
+                    : player;
+
+            if(
+                target &&
+                !target.dead &&
+                distance(
+                    h,
+                    target
+                ) <
+                target.radius +
+                22
+            ){
+
+                createExplosion(
+                    h.x,
+                    h.y,
+                    "#59606e",
+                    60,
+                    h.owner
+                );
+
+                hazards.splice(
+                    i,
+                    1
+                );
+
+                continue;
+            }
+        }
+
+        if(
+            h.type ===
+            "web" ||
+            h.type ===
+            "ice"
+        ){
+
+            for(
+                const target of
+                [player,enemy]
+            ){
+
+                if(
+                    !target ||
+                    target.dead ||
+                    target ===
+                    h.owner
+                ){
+                    continue;
+                }
+
+                if(
+                    distance(
+                        h,
+                        target
+                    ) <
+                    h.radius +
+                    target.radius
+                ){
+
+                    target.slowTimer =
+                        .2;
+
+                    target.slowAmount =
+                        h.type ===
+                            "ice"
+                            ? .3
+                            : .5;
+                }
+            }
+        }
+
+        if(
+            h.type ===
+            "poison"
+        ){
+
+            const target =
+                h.owner ===
+                player
+                    ? enemy
+                    : player;
+
+            if(
+                target &&
+                !target.dead &&
+                distance(
+                    h,
+                    target
+                ) <
+                h.radius +
+                target.radius
+            ){
+
+                target.poisonTimer =
+                    Math.max(
+                        target.poisonTimer,
+                        1
+                    );
+            }
+        }
+
+        if(
+            h.life <= 0
+        ){
+
+            hazards.splice(
+                i,
+                1
+            );
+        }
+    }
+}
+
+/* =========================================================
+   PROJECTILES
+========================================================= */
+
+function updateProjectiles(
+    dt
+){
+
+    for(
+        let i =
+            projectiles.length -
+            1;
+        i >= 0;
+        i--
+    ){
+
+        const p =
+            projectiles[i];
+
+        p.life -=
+            dt;
+
+        const target =
+            p.owner ===
+            player
+                ? enemy
+                : player;
+
+        if(
+            (
+                p.type ===
+                "homing" ||
+                p.type ===
+                "boss"
+            ) &&
+            target &&
+            !target.dead
+        ){
+
+            const dir =
+                normalize(
+                    target.x -
+                    p.x,
+                    target.y -
+                    p.y
+                );
+
+            const speed =
+                Math.max(
+                    180,
+                    Math.hypot(
+                        p.vx,
+                        p.vy
+                    )
+                );
+
+            p.vx +=
+                (
+                    dir.x *
+                    speed -
+                    p.vx
+                ) *
+                3.2 *
+                dt;
+
+            p.vy +=
+                (
+                    dir.y *
+                    speed -
+                    p.vy
+                ) *
+                3.2 *
+                dt;
+        }
+
+        if(
+            p.type ===
+            "boomerang" &&
+            !p.returning
+        ){
+
+            if(
+                p.life <
+                1.5
+            ){
+
+                p.returning =
+                    true;
+            }
+        }
+
+        if(
+            p.type ===
+            "boomerang" &&
+            p.returning &&
+            p.owner &&
+            !p.owner.dead
+        ){
+
+            const dir =
+                normalize(
+                    p.owner.x -
+                    p.x,
+                    p.owner.y -
+                    p.y
+                );
+
+            p.vx +=
+                (
+                    dir.x *
+                    300 -
+                    p.vx
+                ) *
+                4 *
+                dt;
+
+            p.vy +=
+                (
+                    dir.y *
+                    300 -
+                    p.vy
+                ) *
+                4 *
+                dt;
+        }
+
+        p.x +=
+            p.vx *
+            dt;
+
+        p.y +=
+            p.vy *
+            dt;
+
+        if(
+            target &&
+            !target.dead &&
+            Math.hypot(
+                p.x -
+                target.x,
+                p.y -
+                target.y
+            ) <
+            p.radius +
+            target.radius
+        ){
+
+            damageBall(
+                target,
+                p.damage,
+                p.owner,
+                false
+            );
+
+            createHitParticles(
+                target.x,
+                target.y,
+                BALL_INFO[
+                    target.type
+                ].color,
+                4
+            );
+
+            if(
+                p.type ===
+                "boomerang"
+            ){
+
+                p.returning =
+                    true;
+
+            }else{
+
+                projectiles.splice(
+                    i,
+                    1
+                );
+
+                continue;
+            }
+        }
+
+        if(
+            p.x <
+                -50 ||
+            p.x >
+                ARENA_W +
+                50 ||
+            p.y <
+                -50 ||
+            p.y >
+                ARENA_H +
+                50 ||
+            p.life <=
+                0
+        ){
+
+            projectiles.splice(
+                i,
+                1
+            );
+        }
+    }
+}
+
+/* =========================================================
+   STRUCTURES
+========================================================= */
+
+function updateStructures(
+    dt
+){
+
+    for(
+        let i =
+            structures.length -
+            1;
+        i >= 0;
+        i--
+    ){
+
+        const s =
+            structures[i];
+
+        s.life -=
+            dt;
+
+        if(
+            s.type ===
+            "turret"
+        ){
+
+            s.fireTimer -=
+                dt;
+
+            if(
+                s.fireTimer <=
+                0
+            ){
+
+                const target =
+                    s.owner ===
+                    player
+                        ? enemy
+                        : player;
+
+                if(
+                    target &&
+                    !target.dead
+                ){
+
+                    const dir =
+                        normalize(
+                            target.x -
+                            s.x,
+                            target.y -
+                            s.y
+                        );
+
+                    createProjectile(
+                        s.x,
+                        s.y,
+                        dir.x *
+                            230,
+                        dir.y *
+                            230,
+                        s.owner,
+                        "turret"
+                    );
+                }
+
+                s.fireTimer =
+                    .9;
+            }
+        }
+
+        if(
+            s.type ===
+            "crystal"
+        ){
+
+            s.fireTimer -=
+                dt;
+
+            if(
+                s.fireTimer <=
+                0
+            ){
+
+                const target =
+                    s.owner ===
+                    player
+                        ? enemy
+                        : player;
+
+                if(
+                    target &&
+                    !target.dead
+                ){
+
+                    const dir =
+                        normalize(
+                            target.x -
+                            s.x,
+                            target.y -
+                            s.y
+                        );
+
+                    createProjectile(
+                        s.x,
+                        s.y,
+                        dir.x *
+                            210,
+                        dir.y *
+                            210,
+                        s.owner,
+                        "crystal"
+                    );
+                }
+
+                s.fireTimer =
+                    1.1;
+            }
+        }
+
+        if(
+            s.life <=
+            0
+        ){
+
+            structures.splice(
+                i,
+                1
+            );
+        }
+    }
+}
+
+/* =========================================================
+   MINIONS
+========================================================= */
+
+function updateMinions(
+    dt
+){
+
+    for(
+        let i =
+            minions.length -
+            1;
+        i >= 0;
+        i--
+    ){
+
+        const m =
+            minions[i];
+
+        /* DRONE */
+
+        if(
+            m.type ===
+            "drone"
+        ){
+
+            const parent =
+                m.parent;
+
+            if(
+                !parent ||
+                parent.dead
+            ){
+
+                minions.splice(
+                    i,
+                    1
+                );
+
+                continue;
+            }
+
+            m.angle +=
+                dt *
+                3;
+
+            const target =
+                parent ===
+                player
+                    ? enemy
+                    : player;
+
+            m.x =
+                parent.x +
+                Math.cos(
+                    m.angle
+                ) *
+                47;
+
+            m.y =
+                parent.y +
+                Math.sin(
+                    m.angle
+                ) *
+                47;
+
+            if(
+                target &&
+                !target.dead &&
+                Math.hypot(
+                    m.x -
+                    target.x,
+                    m.y -
+                    target.y
+                ) <
+                target.radius +
+                9
+            ){
+
+                damageBall(
+                    target,
+                    5,
+                    parent,
+                    false
+                );
+            }
+
+            continue;
+        }
+
+        /* SPLITTER MINIONS */
+
+        if(
+            m.type ===
+            "split"
+        ){
+
+            m.life -=
+                dt;
+
+            if(
+                m.stage ===
+                1
+            ){
+
+                m.matureTimer -=
+                    dt;
+
+                const target =
+                    m.parent ===
+                    player
+                        ? enemy
+                        : player;
+
+                if(
+                    target &&
+                    !target.dead
+                ){
+
+                    const dir =
+                        normalize(
+                            target.x -
+                            m.x,
+                            target.y -
+                            m.y
+                        );
+
+                    m.vx +=
+                        (
+                            dir.x *
+                            175 -
+                            m.vx
+                        ) *
+                        2.5 *
+                        dt;
+
+                    m.vy +=
+                        (
+                            dir.y *
+                            175 -
+                            m.vy
+                        ) *
+                        2.5 *
+                        dt;
+                }
+
+                m.x +=
+                    m.vx *
+                    dt;
+
+                m.y +=
+                    m.vy *
+                    dt;
+
+                /*
+                   Stage 1 does NOT split
+                   when it dies.
+                */
+
+                if(
+                    target &&
+                    !target.dead &&
+                    Math.hypot(
+                        m.x -
+                        target.x,
+                        m.y -
+                        target.y
+                    ) <
+                    m.radius +
+                    target.radius
+                ){
+
+                    damageBall(
+                        target,
+                        5,
+                        m.parent,
+                        false
+                    );
+
+                    m.life =
+                        0;
+                }
+
+                /*
+                   Stage 1 survived long enough:
+                   grow into Stage 2.
+                */
+
+                if(
+                    m.matureTimer <=
+                    0
+                ){
+
+                    m.stage =
+                        2;
+
+                    m.radius =
+                        21;
+
+                    m.life =
+                        6;
+
+                    m.canSplit =
+                        true;
+
+                    createHitParticles(
+                        m.x,
+                        m.y,
+                        "#ffe27a",
+                        12
+                    );
+                }
+
+            }else{
+
+                /*
+                   Stage 2:
+                   larger and capable of
+                   splitting when destroyed.
+                */
+
+                const target =
+                    m.parent ===
+                    player
+                        ? enemy
+                        : player;
+
+                if(
+                    target &&
+                    !target.dead
+                ){
+
+                    const dir =
+                        normalize(
+                            target.x -
+                            m.x,
+                            target.y -
+                            m.y
+                        );
+
+                    m.vx +=
+                        (
+                            dir.x *
+                            190 -
+                            m.vx
+                        ) *
+                        2.6 *
+                        dt;
+
+                    m.vy +=
+                        (
+                            dir.y *
+                            190 -
+                            m.vy
+                        ) *
+                        2.6 *
+                        dt;
+                }
+
+                m.x +=
+                    m.vx *
+                    dt;
+
+                m.y +=
+                    m.vy *
+                    dt;
+
+                if(
+                    target &&
+                    !target.dead &&
+                    Math.hypot(
+                        m.x -
+                        target.x,
+                        m.y -
+                        target.y
+                    ) <
+                    m.radius +
+                    target.radius
+                ){
+
+                    damageBall(
+                        target,
+                        9,
+                        m.parent,
+                        false
+                    );
+
+                    m.life =
+                        0;
+                }
+            }
+
+            if(
+                m.stage ===
+                    2 &&
+                m.life <=
+                    0 &&
+                !m.splitTriggered
+            ){
+
+                m.splitTriggered =
+                    true;
+
+                splitIntoSmallerBalls(
+                    m.x,
+                    m.y,
+                    m.parent
+                );
+            }
+
+            if(
+                m.life <=
+                    0 ||
+                m.x <
+                    -60 ||
+                m.x >
+                    ARENA_W +
+                    60 ||
+                m.y <
+                    -60 ||
+                m.y >
+                    ARENA_H +
+                    60
+            ){
+
+                minions.splice(
+                    i,
+                    1
+                );
+            }
+
+            continue;
+        }
+
+        /* CLONE */
+
+        if(
+            m.type ===
+            "clone"
+        ){
+
+            m.life -=
+                dt;
+
+            const target =
+                m.parent ===
+                player
+                    ? enemy
+                    : player;
+
+            if(
+                target &&
+                !target.dead
+            ){
+
+                const dir =
+                    normalize(
+                        target.x -
+                        m.x,
+                        target.y -
+                        m.y
+                    );
+
+                m.vx +=
+                    (
+                        dir.x *
+                        145 -
+                        m.vx
+                    ) *
+                    2.5 *
+                    dt;
+
+                m.vy +=
+                    (
+                        dir.y *
+                        145 -
+                        m.vy
+                    ) *
+                    2.5 *
+                    dt;
+            }
+
+            m.x +=
+                m.vx *
+                dt;
+
+            m.y +=
+                m.vy *
+                dt;
+
+            if(
+                target &&
+                !target.dead &&
+                Math.hypot(
+                    m.x -
+                    target.x,
+                    m.y -
+                    target.y
+                ) <
+                m.radius +
+                target.radius
+            ){
+
+                damageBall(
+                    target,
+                    7,
+                    m.parent,
+                    false
+                );
+
+                m.life =
+                    0;
+            }
+
+            if(
+                m.life <=
+                0
+            ){
+
+                minions.splice(
+                    i,
+                    1
+                );
+            }
+        }
+    }
+}
+
+/* =========================================================
+   CHAOS HAZARDS
+========================================================= */
+
+function updateArenaHazards(
+    dt
+){
+
+    if(
+        modeSelect.value !==
+        "chaos"
+    ){
+        return;
+    }
+
+    if(
+        Math.random() <
+        dt *
+        .18 &&
+        arenaHazards.length <
+        5
+    ){
+
+        arenaHazards.push({
+
+            x:
+                randomRange(
+                    30,
+                    ARENA_W -
+                    30
+                ),
+
+            y:
+                randomRange(
+                    30,
+                    ARENA_H -
+                    30
+                ),
+
+            radius:
+                randomRange(
+                    16,
+                    28
+                ),
+
+            life:
+                randomRange(
+                    2,
+                    4
+                ),
+
+            type:
+                Math.random() <
+                    .5
+                    ? "fire"
+                    : "shock"
+        });
+    }
+
+    for(
+        let i =
+            arenaHazards.length -
+            1;
+        i >= 0;
+        i--
+    ){
+
+        const h =
+            arenaHazards[i];
+
+        h.life -=
+            dt;
+
+        for(
+            const ball of
+            [player,enemy]
+        ){
+
+            if(
+                !ball ||
+                ball.dead
+            ){
+                continue;
+            }
+
+            if(
+                Math.hypot(
+                    ball.x -
+                    h.x,
+                    ball.y -
+                    h.y
+                ) <
+                ball.radius +
+                h.radius
+            ){
+
+                if(
+                    h.type ===
+                    "fire"
+                ){
+
+                    damageBall(
+                        ball,
+                        10 *
+                        dt,
+                        null,
+                        false
+                    );
+
+                }else{
+
+                    const dir =
+                        normalize(
+                            ball.x -
+                            h.x,
+                            ball.y -
+                            h.y
+                        );
+
+                    ball.vx +=
+                        dir.x *
+                        110 *
+                        dt;
+
+                    ball.vy +=
+                        dir.y *
+                        110 *
+                        dt;
+                }
+            }
+        }
+
+        if(
+            h.life <=
+            0
+        ){
+
+            arenaHazards.splice(
+                i,
+                1
+            );
+        }
+    }
+}
+
+/* =========================================================
+   PARTICLES
+========================================================= */
+
+function createHitParticles(
+    x,
+    y,
+    color,
+    amount = 7
+){
+
+    for(
+        let i = 0;
+        i < amount;
+        i++
+    ){
+
+        particles.push({
+
+            type:"particle",
+
+            x,
+
+            y,
+
+            vx:
+                randomRange(
+                    -70,
+                    70
+                ),
+
+            vy:
+                randomRange(
+                    -70,
+                    70
+                ),
+
+            size:
+                randomRange(
+                    2,
+                    4
+                ),
+
+            life:
+                randomRange(
+                    .25,
+                    .5
+                ),
+
+            maxLife:.5,
+
+            color
+        });
+    }
+}
+
+function createImpactBurst(
+    x,
+    y
+){
+
+    particles.push({
+
+        type:"ring",
+
+        x,
+
+        y,
+
+        radius:4,
+
+        maxRadius:25,
+
+        life:.22,
+
+        maxLife:.22,
+
+        owner:null,
+
+        color:
+            "rgba(255,255,255,.8)",
+
+        hit:true
+    });
+}
+
+function createScorchMark(
+    x,
+    y,
+    radius
+){
+
+    scorchMarks.push({
+
+        x,
+
+        y,
+
+        radius,
+
+        life:999
+    });
+}
+
+function updateParticles(
+    dt
+){
+
+    for(
+        let i =
+            particles.length -
+            1;
+        i >= 0;
+        i--
+    ){
+
+        const p =
+            particles[i];
+
+        p.life -=
+            dt;
+
+        if(
+            p.type ===
+            "particle"
+        ){
+
+            p.x +=
+                p.vx *
+                dt;
+
+            p.y +=
+                p.vy *
+                dt;
+
+            p.vx *=
+                .96;
+
+            p.vy *=
+                .96;
+        }
+
+        if(
+            p.type ===
+            "explosion"
+        ){
+
+            p.radius +=
+                (
+                    p.maxRadius -
+                    p.radius
+                ) *
+                dt *
+                12;
+        }
+
+        if(
+            p.type ===
+            "ring"
+        ){
+
+            p.radius +=
+                (
+                    p.maxRadius -
+                    p.radius
+                ) *
+                dt *
+                8;
+
+            if(
+                !p.hit &&
+                p.owner
+            ){
+
+                const target =
+                    p.owner ===
+                    player
+                        ? enemy
+                        : player;
+
+                if(
+                    target &&
+                    !target.dead &&
+                    Math.abs(
+                        distance(
+                            p,
+                            target
+                        ) -
+                        p.radius
+                    ) <
+                    12
+                ){
+
+                    damageBall(
+                        target,
+                        11,
+                        p.owner,
+                        false
+                    );
+
+                    p.hit =
+                        true;
+                }
+            }
+        }
+
+        if(
+            p.life <=
+            0
+        ){
+
+            particles.splice(
+                i,
+                1
+            );
+        }
+    }
+}
+
+/* =========================================================
+   ULTIMATE
+========================================================= */
+
+function useUltimate(){
+
+    if(
+        !fightRunning ||
+        aiming ||
+        countdown > 0 ||
+        !player ||
+        player.dead ||
+        player.ultimate <
+            100
+    ){
+        return;
+    }
+
+    const target =
+        enemy;
+
+    if(
+        !target ||
+        target.dead
+    ){
+        return;
+    }
+
+    player.ultimate = 0;
+
+    const color =
+        BALL_INFO[
+            player.type
+        ].color;
+
+    switch(
+        player.type
+    ){
+
+        case "basic":
+
+            damageBall(
+                target,
+                28,
+                player,
+                false
+            );
+
+            break;
+
+        case "charge":
+
+            player.chargeStage =
+                5;
+
+            player.vx *=
+                1.7;
+
+            player.vy *=
+                1.7;
+
+            break;
+
+        case "berserker":
+
+            player.rage = 5;
+
+            player.vx *=
+                1.55;
+
+            player.vy *=
+                1.55;
+
+            break;
+
+        case "shield":
+
+            player.shieldActive =
+                true;
+
+            player.shieldTimer =
+                4;
+
+            break;
+
+        case "spike":
+        case "poison":
+
+            for(
+                let i = 0;
+                i < 4;
+                i++
+            ){
+
+                placeSpikeAtBorder(
+                    {
+                        ...player,
+                        x:
+                            randomRange(
+                                25,
+                                ARENA_W -
+                                25
+                            ),
+                        y:
+                            randomRange(
+                                25,
+                                ARENA_H -
+                                25
+                            ),
+                        spikeCooldown:0
+                    },
+                    [
+                        "top",
+                        "bottom",
+                        "left",
+                        "right"
+                    ][i]
+                );
+            }
+
+            break;
+
+        case "magnet":
+        case "gravity":{
+
+            const dir =
+                normalize(
+                    player.x -
+                    target.x,
+                    player.y -
+                    target.y
+                );
+
+            target.vx +=
+                dir.x *
+                500;
+
+            target.vy +=
+                dir.y *
+                500;
+
+            damageBall(
+                target,
+                20,
+                player,
+                false
+            );
+
+            break;
+        }
+
+        case "dash":
+
+            player.vx *=
+                2;
+
+            player.vy *=
+                2;
+
+            player.armorTimer =
+                2.5;
+
+            break;
+
+        case "bomb":
+
+            createExplosion(
+                target.x,
+                target.y,
+                color,
+                110,
+                player
+            );
+
+            break;
+
+        case "splitter":
+
+            splitIntoSmallerBalls(
+                player.x,
+                player.y,
+                player
+            );
+
+            splitIntoSmallerBalls(
+                player.x,
+                player.y,
+                player
+            );
+
+            break;
+
+        case "healer":
+
+            player.hp =
+                Math.min(
+                    player.maxHp,
+                    player.hp +
+                    40
+                );
+
+            break;
+
+        case "vampire":
+
+            damageBall(
+                target,
+                20,
+                player,
+                false
+            );
+
+            player.hp =
+                Math.min(
+                    player.maxHp,
+                    player.hp +
+                    25
+                );
+
+            break;
+
+        case "reflector":
+
+            player.armorTimer =
+                3;
+
+            damageBall(
+                target,
+                15,
+                player,
+                false
+            );
+
+            break;
+
+        case "thorns":
+
+            player.armorTimer =
+                3;
+
+            break;
+
+        case "freeze":
+
+            target.slowTimer =
+                5;
+
+            target.slowAmount =
+                .2;
+
+            break;
+
+        case "burn":
+
+            target.burnTimer =
+                6;
+
+            target.burnTickTimer =
+                0;
+
+            break;
+
+        case "lightning":
+
+            for(
+                let i = 0;
+                i < 4;
+                i++
+            ){
+
+                damageBall(
+                    target,
+                    12,
+                    player,
+                    false
+                );
+            }
+
+            createExplosion(
+                target.x,
+                target.y,
+                color,
+                35,
+                player
+            );
+
+            break;
+
+        case "teleporter":
+
+            player.x =
+                randomRange(
+                    60,
+                    ARENA_W -
+                    60
+                );
+
+            player.y =
+                randomRange(
+                    60,
+                    ARENA_H -
+                    60
+                );
+
+            break;
+
+        case "ricochet":
+
+            player.ricochetPower =
+                18;
+
+            player.vx *=
+                1.35;
+
+            player.vy *=
+                1.35;
+
+            break;
+
+        case "wallmaker":
+
+            for(
+                let i = 0;
+                i < 3;
+                i++
+            ){
+
+                structures.push({
+
+                    type:"wall",
+
+                    owner:player,
+
+                    x:
+                        randomRange(
+                            70,
+                            ARENA_W -
+                            70
+                        ),
+
+                    y:
+                        randomRange(
+                            70,
+                            ARENA_H -
+                            70
+                        ),
+
+                    width:85,
+
+                    height:14,
+
+                    life:5
+                });
+            }
+
+            break;
+
+        case "minelayer":
+
+            for(
+                let i = 0;
+                i < 5;
+                i++
+            ){
+
+                hazards.push({
+
+                    x:
+                        clamp(
+                            player.x +
+                            randomRange(
+                                -45,
+                                45
+                            ),
+                            20,
+                            ARENA_W -
+                            20
+                        ),
+
+                    y:
+                        clamp(
+                            player.y +
+                            randomRange(
+                                -45,
+                                45
+                            ),
+                            20,
+                            ARENA_H -
+                            20
+                        ),
+
+                    radius:10,
+
+                    life:8,
+
+                    maxLife:8,
+
+                    type:"mine",
+
+                    owner:player
+                });
+            }
+
+            break;
+
+        case "turret":
+
+            for(
+                let i = 0;
+                i < 2;
+                i++
+            ){
+
+                createTurret(
+                    player
+                );
+            }
+
+            break;
+
+        case "drone":
+
+            for(
+                let i = 0;
+                i < 2;
+                i++
+            ){
+
+                minions.push({
+
+                    type:"drone",
+
+                    parent:player,
+
+                    angle:
+                        Math.random() *
+                        Math.PI *
+                        2,
+
+                    life:999
+                });
+            }
+
+            break;
+
+        case "boomerang":
+        case "homing":
+
+            for(
+                let i = 0;
+                i < 4;
+                i++
+            ){
+
+                const dir =
+                    normalize(
+                        target.x -
+                        player.x,
+                        target.y -
+                        player.y
+                    );
+
+                createProjectile(
+                    player.x,
+                    player.y,
+                    dir.x *
+                        290 +
+                        randomRange(
+                            -25,
+                            25
+                        ),
+                    dir.y *
+                        290 +
+                        randomRange(
+                            -25,
+                            25
+                        ),
+                    player,
+                    player.type
+                );
+            }
+
+            break;
+
+        case "doublehit":
+
+            damageBall(
+                target,
+                18,
+                player,
+                true
+            );
+
+            setTimeout(
+                () => {
+
+                    if(
+                        target &&
+                        !target.dead
+                    ){
+
+                        damageBall(
+                            target,
+                            18,
+                            player,
+                            false
+                        );
+                    }
+
+                },
+                130
+            );
+
+            break;
+
+        case "executioner":
+
+            damageBall(
+                target,
+                45,
+                player,
+                true
+            );
+
+            break;
+
+        case "glass":
+
+            damageBall(
+                target,
+                34,
+                player,
+                true
+            );
+
+            break;
+
+        case "speedster":
+
+            player.vx *=
+                2;
+
+            player.vy *=
+                2;
+
+            break;
+
+        case "tank":
+
+            player.armorTimer =
+                4;
+
+            break;
+
+        case "shrinker":
+
+            target.shrinkTimer =
+                6;
+
+            target.shrinkAmount =
+                .5;
+
+            break;
+
+        case "grower":
+
+            player.growAmount +=
+                7;
+
+            player.radius +=
+                7;
+
+            break;
+
+        case "timekeeper":
+
+            target.slowTimer =
+                6;
+
+            target.slowAmount =
+                .28;
+
+            break;
+
+        case "orbitals":
+
+            damageBall(
+                target,
+                30,
+                player,
+                false
+            );
+
+            break;
+
+        case "webber":
+
+            for(
+                let i = 0;
+                i < 4;
+                i++
+            ){
+
+                createHazard(
+                    randomRange(
+                        50,
+                        ARENA_W -
+                        50
+                    ),
+                    randomRange(
+                        50,
+                        ARENA_H -
+                        50
+                    ),
+                    50,
+                    4,
+                    "web",
+                    player
+                );
+            }
+
+            break;
+
+        case "firering":
+
+            particles.push({
+
+                type:"ring",
+
+                x:player.x,
+
+                y:player.y,
+
+                radius:
+                    player.radius,
+
+                maxRadius:240,
+
+                life:1,
+
+                maxLife:1,
+
+                owner:player,
+
+                color:
+
+                    color,
+
+                hit:false
+            });
+
+            break;
+
+        case "shockwave":{
+
+            const dir =
+                normalize(
+                    target.x -
+                    player.x,
+                    target.y -
+                    player.y
+                );
+
+            target.vx +=
+                dir.x *
+                550;
+
+            target.vy +=
+                dir.y *
+                550;
+
+            damageBall(
+                target,
+                18,
+                player,
+                false
+            );
+
+            break;
+        }
+
+        case "boiling":
+
+            damageBall(
+                target,
+                18 +
+                (
+                    1 -
+                    player.hp /
+                    player.maxHp
+                ) *
+                30,
+                player,
+                false
+            );
+
+            break;
+
+        case "clone":
+
+            if(
+                !player.cloneCreated
+            ){
+
+                player.cloneCreated =
+                    true;
+
+                minions.push({
+
+                    type:"clone",
+
+                    parent:player,
+
+                    x:
+                        player.x +
+                        25,
+
+                    y:
+                        player.y +
+                        20,
+
+                    vx:
+                        player.vx,
+
+                    vy:
+                        player.vy,
+
+                    radius:19,
+
+                    life:7
+                });
+            }
+
+            break;
+
+        case "poisoncloud":
+
+            for(
+                let i = 0;
+                i < 4;
+                i++
+            ){
+
+                createHazard(
+                    randomRange(
+                        50,
+                        ARENA_W -
+                        50
+                    ),
+                    randomRange(
+                        50,
+                        ARENA_H -
+                        50
+                    ),
+                    48,
+                    5,
+                    "poison",
+                    player
+                );
+            }
+
+            break;
+
+        case "icetrail":
+
+            for(
+                let i = 0;
+                i < 4;
+                i++
+            ){
+
+                createHazard(
+                    randomRange(
+                        50,
+                        ARENA_W -
+                        50
+                    ),
+                    randomRange(
+                        50,
+                        ARENA_H -
+                        50
+                    ),
+                    52,
+                    5,
+                    "ice",
+                    player
+                );
+            }
+
+            break;
+
+        case "crystal":
+
+            for(
+                let i = 0;
+                i < 3;
+                i++
+            ){
+
+                createCrystal(
+                    player
+                );
+            }
+
+            break;
+
+        case "bouncer":
+
+            player.vx *=
+                1.5;
+
+            player.vy *=
+                1.5;
+
+            player.armorTimer =
+                3;
+
+            break;
+
+        case "phase":
+
+            player.phaseActive =
+                true;
+
+            player.phaseTimer =
+                4;
+
+            break;
+
+        case "roulette":{
+
+            const effects = [
+                "damage",
+                "speed",
+                "shield",
+                "slow"
+            ];
+
+            player.rouletteEffect =
+                effects[
+                    Math.floor(
+                        Math.random() *
+                        effects.length
+                    )
+                ];
+
+            player.roulettePower =
+                player.rouletteEffect ===
+                "damage"
+                    ? 2
+                    : 1;
+
+            player.rouletteEffectTimer =
+                6;
+
+            break;
+        }
+
+        default:
+
+            damageBall(
+                target,
+                25,
+                player,
+                false
+            );
+
+            break;
+    }
+
+    status.textContent =
+        "ULTIMATE ACTIVATED!";
+}
+
+/* =========================================================
+   START FIGHT
+========================================================= */
+
+function startFight(){
+
+    if(
+        fightRunning
+    ){
+        return;
+    }
+
+    currentMode =
+        modeSelect.value;
+
+    resetArenaObjects();
+
+    resultOverlay.classList.remove(
+        "show"
+    );
+
+    wave = 1;
+
+    survivalKills = 0;
+
+    fightEnded = false;
+
+    fightRunning = true;
+
+    aiming = true;
+
+    fightStage =
+        "direction";
+
+    player =
+        createBall(
+            selectedBallType,
+            ARENA_W * .25,
+            ARENA_H * .5,
+            true
+        );
+
+    if(
+        modeSelect.value ===
+        "boss"
+    ){
+
+        enemy =
+            createBall(
+                "basic",
+                ARENA_W * .75,
+                ARENA_H * .5,
+                false,
+                {
+                    isBoss:true
+                }
+            );
+
+    }else{
+
+        enemy =
+            createBall(
+                enemyBallType,
+                ARENA_W * .75,
+                ARENA_H * .5,
+                false
+            );
+    }
+
+    player.vx =
+        player.vy =
+        enemy.vx =
+        enemy.vy = 0;
+
+    aimMouseX =
+        player.x +
+        130;
+
+    aimMouseY =
+        player.y;
+
+    randomBtn.disabled =
+        true;
+
+    ultimateBtn.disabled =
+        true;
+
+    startBtn.textContent =
+        "Choose Direction";
+
+    status.textContent =
+        "Stage 2 — Both balls are frozen. Choose your direction.";
+
+    updateAbilityInfo();
+
+    updatePreviewLabels();
+
+    updateHealthUI();
+}
+
+/* =========================================================
+   LAUNCH BOTH
+========================================================= */
+
+function launchBoth(
+    mouseX,
+    mouseY
+){
+
+    if(
+        !fightRunning ||
+        !aiming ||
+        !player ||
+        !enemy ||
+        player.dead ||
+        enemy.dead
+    ){
+        return;
+    }
+
+    const playerDir =
+        normalize(
+            mouseX -
+                player.x,
+            mouseY -
+                player.y
+        );
+
+    player.vx =
+        playerDir.x *
+        LAUNCH_SPEED;
+
+    player.vy =
+        playerDir.y *
+        LAUNCH_SPEED;
+
+    /*
+       Enemy launches toward the player
+       at the exact same moment.
+    */
+
+    const enemyAngle =
+        Math.atan2(
+            player.y -
+                enemy.y,
+            player.x -
+                enemy.x
+        ) +
+        randomRange(
+            -.35,
+            .35
+        );
+
+    enemy.vx =
+        Math.cos(
+            enemyAngle
+        ) *
+        LAUNCH_SPEED;
+
+    enemy.vy =
+        Math.sin(
+            enemyAngle
+        ) *
+        LAUNCH_SPEED;
+
+    aiming = false;
+
+    fightStage =
+        "countdown";
+
+    countdown =
+        .9;
+
+    countdownShown =
+        1;
+
+    status.textContent =
+        "Stage 3 — Fight starting!";
+
+    startBtn.textContent =
+        "FIGHT!";
+}
+
+/* =========================================================
+   CANCEL SETUP
+========================================================= */
+
+function cancelFightSetup(){
+
+    if(
+        !fightRunning ||
+        !aiming
+    ){
+        return;
+    }
+
+    fightRunning =
+        false;
+
+    aiming =
+        false;
+
+    fightEnded =
+        false;
+
+    fightStage =
+        "choose";
+
+    resetArenaObjects();
+
+    player =
+        createBall(
+            selectedBallType,
+            ARENA_W * .25,
+            ARENA_H * .5,
+            true
+        );
+
+    enemy =
+        createBall(
+            enemyBallType,
+            ARENA_W * .75,
+            ARENA_H * .5,
+            false
+        );
+
+    player.vx =
+        player.vy =
+        enemy.vx =
+        enemy.vy = 0;
+
+    startBtn.textContent =
+        "Start Fight";
+
+    randomBtn.disabled =
+        false;
+
+    status.textContent =
+        "Stage 1 — Select a ball and press Start Fight.";
+
+    updateHealthUI();
+}
+
+/* =========================================================
+   NEXT SURVIVAL WAVE
+========================================================= */
+
+function startNextSurvivalWave(){
+
+    wave++;
+
+    survivalKills++;
+
+    resetArenaObjects();
+
+    enemy =
+        createBall(
+            BALL_ORDER[
+                Math.floor(
+                    Math.random() *
+                    BALL_ORDER.length
+                )
+            ],
+            ARENA_W * .75,
+            ARENA_H * .5,
+            false
+        );
+
+    const angle =
+        Math.atan2(
+            player.y -
+                enemy.y,
+            player.x -
+                enemy.x
+        );
+
+    enemy.vx =
+        Math.cos(angle) *
+        LAUNCH_SPEED;
+
+    enemy.vy =
+        Math.sin(angle) *
+        LAUNCH_SPEED;
+
+    player.hitCooldown =
+        .5;
+
+    status.textContent =
+        `Wave ${wave}!`;
+
+    fightEnded =
+        false;
+
+    fightRunning =
+        true;
+
+    aiming =
+        false;
+
+    fightStage =
+        "fight";
+}
+
+/* =========================================================
+   END FIGHT
+========================================================= */
+
+function endFight(){
+
+    if(
+        fightEnded
+    ){
+        return;
+    }
+
+    /*
+       Survival mode:
+       defeating an enemy starts
+       the next wave automatically.
+    */
+
+    if(
+        currentMode ===
+        "survival" &&
+        enemy &&
+        enemy.dead &&
+        player &&
+        !player.dead
+    ){
+
+        if(
+            survivalKills <
+            4
+        ){
+
+            startNextSurvivalWave();
+
+            return;
+        }
+    }
+
+    fightEnded =
+        true;
+
+    fightRunning =
+        false;
+
+    aiming =
+        false;
+
+    fightStage =
+        "choose";
+
+    let title =
+        "DEFEAT";
+
+    let subtitle =
+        "The enemy won.";
+
+    if(
+        player.dead &&
+        enemy.dead
+    ){
+
+        title =
+            "DRAW";
+
+        subtitle =
+            "Both balls were destroyed.";
+
+        profile.coins +=
+            10;
+
+    }else if(
+        enemy.dead
+    ){
+
+        title =
+            "VICTORY";
+
+        subtitle =
+            `${BALL_INFO[player.type].name} wins!`;
+
+        profile.wins++;
+
+        profile.coins +=
+            25 +
+            wave *
+            5;
+
+    }else{
+
+        profile.losses++;
+    }
+
+    saveProfile();
+
+    resultTitle.textContent =
+        title;
+
+    resultSubtitle.textContent =
+        subtitle;
+
+    resultStats.textContent =
+        `Wins ${profile.wins} • Losses ${profile.losses} • Coins ${profile.coins}`;
+
+    resultOverlay.classList.add(
+        "show"
+    );
+
+    startBtn.textContent =
+        "Rematch";
+
+    randomBtn.disabled =
+        false;
+
+    updateProfileUI();
+
+    updateHealthUI();
+}
+
+/* =========================================================
+   RANDOM ENEMY
+========================================================= */
+
+function chooseRandomEnemy(){
+
+    if(
+        fightRunning
+    ){
+        return;
+    }
+
+    const available =
+        BALL_ORDER.filter(
+            type =>
+                type !==
+                selectedBallType
+        );
+
+    enemyBallType =
+        available[
+            Math.floor(
+                Math.random() *
+                available.length
+            )
+        ];
+
+    updatePreviewLabels();
+
+    status.textContent =
+        `Enemy selected: ${BALL_INFO[enemyBallType].name}`;
+}
+
+/* =========================================================
+   RESET
+========================================================= */
+
+function resetArenaObjects(){
+
+    spikes = [];
+
+    particles = [];
+
+    projectiles = [];
+
+    hazards = [];
+
+    structures = [];
+
+    minions = [];
+
+    arenaHazards = [];
+
+    scorchMarks = [];
+}
+
+/* =========================================================
+   UI
+========================================================= */
+
+function updatePreviewLabels(){
+
+    playerName.textContent =
+        BALL_INFO[
+            selectedBallType
+        ].name;
+
+    if(enemy){
+
+        enemyName.textContent =
+            enemy.isBoss
+                ? "Arena Boss"
+                : BALL_INFO[
+                    enemy.type
+                ].name;
+
+    }else{
+
+        enemyName.textContent =
+            BALL_INFO[
+                enemyBallType
+            ].name;
+    }
+
+    enemyModeText.textContent =
+        difficultySelect.value
+            .charAt(0)
+            .toUpperCase() +
+        difficultySelect.value
+            .slice(1) +
+        " AI";
+}
+
+function updateProfileUI(){
+
+    profileText.textContent =
+        `Wins ${profile.wins}`;
+
+    profileDisplay.textContent =
+        `Wins: ${profile.wins} • Losses: ${profile.losses} • Coins: ${profile.coins}`;
+}
+
+function updateHealthUI(){
+
+    if(
+        !player
+    ){
+        return;
+    }
+
+    const playerRatio =
+        clamp(
+            player.hp /
+            player.maxHp,
+            0,
+            1
+        );
+
+    const enemyRatio =
+        enemy
+            ? clamp(
+                enemy.hp /
+                enemy.maxHp,
+                0,
+                1
+            )
+            : 0;
+
+    playerHealth.style.width =
+        `${playerRatio * 100}%`;
+
+    enemyHealth.style.width =
+        `${enemyRatio * 100}%`;
+
+    playerHpText.textContent =
+        `${Math.ceil(player.hp)} / ${player.maxHp}`;
+
+    enemyHpText.textContent =
+        enemy
+            ? `${Math.ceil(enemy.hp)} / ${enemy.maxHp}`
+            : "—";
+
+    ultimateMeter.style.width =
+        `${player.ultimate}%`;
+
+    ultimatePercent.textContent =
+        `${Math.floor(player.ultimate)}%`;
+
+    comboText.textContent =
+        `Combo ${player.combo}`;
+
+    waveText.textContent =
+        `Wave ${wave}`;
+
+    enemyMeter.style.width =
+        `${enemyRatio * 100}%`;
+
+    enemyState.textContent =
+        aiming
+            ? "Waiting"
+            : countdown > 0
+                ? "Launching"
+                : fightRunning
+                    ? "Fighting"
+                    : "Ready";
+
+    ultimateBtn.disabled =
+        !(
+            fightRunning &&
+            !aiming &&
+            countdown <= 0 &&
+            player.ultimate >= 100
+        );
+
+    if(
+        player.ultimate >= 100
+    ){
+
+        ultimateBtn.classList.add(
+            "ready"
+        );
+
+        ultimateBtn.textContent =
+            "ULTIMATE READY";
+
+    }else{
+
+        ultimateBtn.classList.remove(
+            "ready"
+        );
+
+        ultimateBtn.textContent =
+            "Ultimate";
+    }
+}
+
+/* =========================================================
+   MOUSE
+========================================================= */
+
+function getCanvasMouse(
+    event
+){
+
+    const rect =
+        canvas.getBoundingClientRect();
+
+    return {
+
+        x:
+            (
+                event.clientX -
+                rect.left
+            ) *
+            (
+                canvas.width /
+                rect.width
+            ),
+
+        y:
+            (
+                event.clientY -
+                rect.top
+            ) *
+            (
+                canvas.height /
+                rect.height
+            )
+    };
+}
+
+canvas.addEventListener(
+    "mousemove",
+    event => {
+
+        const pos =
+            getCanvasMouse(
+                event
+            );
+
+        aimMouseX =
+            pos.x;
+
+        aimMouseY =
+            pos.y;
+    }
+);
+
+canvas.addEventListener(
+    "click",
+    event => {
+
+        if(
+            !aiming
+        ){
+            return;
+        }
+
+        const pos =
+            getCanvasMouse(
+                event
+            );
+
+        launchBoth(
+            pos.x,
+            pos.y
+        );
+    }
+);
+
+/* =========================================================
+   KEYBOARD
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if(
+            event.key ===
+            "Escape" &&
+            aiming
+        ){
+
+            cancelFightSetup();
+        }
+
+        if(
+            event.code ===
+            "Space"
+        ){
+
+            event.preventDefault();
+
+            useUltimate();
+        }
+    }
+);
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+startBtn.addEventListener(
+    "click",
+    () => {
+
+        if(
+            !fightRunning
+        ){
+
+            startFight();
+        }
+    }
+);
+
+randomBtn.addEventListener(
+    "click",
+    chooseRandomEnemy
+);
+
+ultimateBtn.addEventListener(
+    "click",
+    useUltimate
+);
+
+searchBox.addEventListener(
+    "input",
+    buildBallCards
+);
+
+modeSelect.addEventListener(
+    "change",
+    () => {
+
+        if(
+            fightRunning
+        ){
+            return;
+        }
+
+        status.textContent =
+            `Mode selected: ${modeSelect.options[modeSelect.selectedIndex].text}`;
+    }
+);
+
+difficultySelect.addEventListener(
+    "change",
+    () => {
+
+        if(
+            fightRunning
+        ){
+            return;
+        }
+
+        updatePreviewLabels();
+
+        status.textContent =
+            `Difficulty selected: ${difficultySelect.value}`;
+    }
+);
+
+/* =========================================================
+   DRAW ARENA
+========================================================= */
+
+function drawArena(){
+
+    const gradient =
+        ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            ARENA_H
+        );
+
+    gradient.addColorStop(
+        0,
+        "#182235"
+    );
+
+    gradient.addColorStop(
+        1,
+        "#0d131d"
+    );
+
+    ctx.fillStyle =
+        gradient;
+
+    ctx.fillRect(
+        0,
+        0,
+        ARENA_W,
+        ARENA_H
+    );
+
+    ctx.strokeStyle =
+        "rgba(255,255,255,.035)";
+
+    ctx.lineWidth = 1;
+
+    for(
+        let x = 0;
+        x <= ARENA_W;
+        x += 25
+    ){
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x,
+            0
+        );
+
+        ctx.lineTo(
+            x,
+            ARENA_H
+        );
+
+        ctx.stroke();
+    }
+
+    for(
+        let y = 0;
+        y <= ARENA_H;
+        y += 25
+    ){
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            0,
+            y
+        );
+
+        ctx.lineTo(
+            ARENA_W,
+            y
+        );
+
+        ctx.stroke();
+    }
+
+    /*
+       Arena damage marks.
+    */
+
+    for(
+        const mark of
+        scorchMarks
+    ){
+
+        ctx.beginPath();
+
+        ctx.fillStyle =
+            "rgba(0,0,0,.18)";
+
+        ctx.arc(
+            mark.x,
+            mark.y,
+            mark.radius,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+    }
+
+    ctx.strokeStyle =
+        "rgba(255,255,255,.2)";
+
+    ctx.lineWidth = 4;
+
+    ctx.strokeRect(
+        2,
+        2,
+        ARENA_W - 4,
+        ARENA_H - 4
+    );
+}
+
+/* =========================================================
+   DRAW BALL
+========================================================= */
+
+function drawBall(
+    ball
+){
+
+    if(
+        !ball ||
+        ball.dead
+    ){
+        return;
+    }
+
+    let radius =
+        ball.radius;
+
+    if(
+        ball.shrinkTimer >
+        0
+    ){
+
+        radius *=
+            ball.shrinkAmount;
+    }
+
+    const info =
+        BALL_INFO[
+            ball.type
+        ];
+
+    ctx.beginPath();
+
+    ctx.fillStyle =
+        "rgba(0,0,0,.35)";
+
+    ctx.ellipse(
+        ball.x + 3,
+        ball.y + 5,
+        radius * .95,
+        radius * .65,
+        0,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+    const gradient =
+        ctx.createRadialGradient(
+            ball.x -
+                radius *
+                .35,
+            ball.y -
+                radius *
+                .4,
+            2,
+            ball.x,
+            ball.y,
+            radius
+        );
+
+    gradient.addColorStop(
+        0,
+        "#ffffff"
+    );
+
+    gradient.addColorStop(
+        .18,
+        info.color
+    );
+
+    gradient.addColorStop(
+        1,
+        shadeColor(
+            info.color,
+            -55
+        )
+    );
+
+    ctx.beginPath();
+
+    ctx.fillStyle =
+        gradient;
+
+    ctx.arc(
+        ball.x,
+        ball.y,
+        radius,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+    /* Splitter stage */
+
+    if(
+        ball.type ===
+        "splitter"
+    ){
+
+        ctx.beginPath();
+
+        ctx.strokeStyle =
+            "#fff0a2";
+
+        ctx.lineWidth = 4;
+
+        ctx.arc(
+            ball.x,
+            ball.y,
+            radius + 6,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.stroke();
+
+        ctx.fillStyle =
+            "#5a4300";
+
+        ctx.font =
+            "bold 15px Arial";
+
+        ctx.textAlign =
+            "center";
+
+        ctx.textBaseline =
+            "middle";
+
+        ctx.fillText(
+            "2",
+            ball.x,
+            ball.y
+        );
+    }
+
+    /* Phase */
+
+    if(
+        ball.type ===
+        "phase" &&
+        ball.phaseActive
+    ){
+
+        ctx.beginPath();
+
+        ctx.strokeStyle =
+            "#dcb4ff";
+
+        ctx.lineWidth = 4;
+
+        ctx.setLineDash(
+            [5,5]
+        );
+
+        ctx.arc(
+            ball.x,
+            ball.y,
+            radius + 7,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.stroke();
+
+        ctx.setLineDash([]);
+    }
+
+    /* Charge */
+
+    if(
+        ball.type ===
+        "charge"
+    ){
+
+        ctx.beginPath();
+
+        ctx.strokeStyle =
+            "#fff1a0";
+
+        ctx.lineWidth = 3;
+
+        ctx.arc(
+            ball.x,
+            ball.y,
+            radius + 5,
+            -Math.PI / 2,
+            -Math.PI /
+                2 +
+            Math.PI *
+                2 *
+                (
+                    ball.chargeStage /
+                    5
+                )
+        );
+
+        ctx.stroke();
+
+        ctx.fillStyle =
+            "#5a4300";
+
+        ctx.font =
+            "bold 14px Arial";
+
+        ctx.textAlign =
+            "center";
+
+        ctx.textBaseline =
+            "middle";
+
+        ctx.fillText(
+            String(
+                ball.chargeStage
+            ),
+            ball.x,
+            ball.y
+        );
+    }
+
+    /* Berserker */
+
+    if(
+        ball.type ===
+        "berserker"
+    ){
+
+        ctx.beginPath();
+
+        ctx.strokeStyle =
+            "#ff6b6b";
+
+        ctx.lineWidth = 3;
+
+        ctx.arc(
+            ball.x,
+            ball.y,
+            radius + 5,
+            0,
+            Math.PI *
+                2 *
+                (
+                    ball.rage /
+                    5
+                )
+        );
+
+        ctx.stroke();
+
+        ctx.fillStyle =
+            "#fff";
+
+        ctx.font =
+            "bold 14px Arial";
+
+        ctx.textAlign =
+            "center";
+
+        ctx.textBaseline =
+            "middle";
+
+        ctx.fillText(
+            String(ball.rage),
+            ball.x,
+            ball.y
+        );
+    }
+
+    /* Shield */
+
+    if(
+        ball.type ===
+        "shield" &&
+        ball.shieldActive
+    ){
+
+        ctx.beginPath();
+
+        ctx.strokeStyle =
+            "#75b8ff";
+
+        ctx.lineWidth = 4;
+
+        ctx.arc(
+            ball.x,
+            ball.y,
+            radius + 8,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.stroke();
+    }
+
+    /* Roulette */
+
+    if(
+        ball.type ===
+        "roulette" &&
+        ball.rouletteEffect !==
+        "none"
+    ){
+
+        ctx.beginPath();
+
+        ctx.strokeStyle =
+            "#ff72a7";
+
+        ctx.lineWidth = 3;
+
+        ctx.arc(
+            ball.x,
+            ball.y,
+            radius + 8,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.stroke();
+    }
+
+    /* Poison */
+
+    if(
+        ball.poisonTimer >
+        0
+    ){
+
+        ctx.beginPath();
+
+        ctx.strokeStyle =
+            "#62ef68";
+
+        ctx.lineWidth = 3;
+
+        ctx.arc(
+            ball.x,
+            ball.y,
+            radius + 4,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.stroke();
+    }
+
+    /* Armor */
+
+    if(
+        ball.armorTimer >
+        0
+    ){
+
+        ctx.beginPath();
+
+        ctx.strokeStyle =
+            "rgba(255,255,255,.9)";
+
+        ctx.lineWidth = 2;
+
+        ctx.setLineDash(
+            [3,4]
+        );
+
+        ctx.arc(
+            ball.x,
+            ball.y,
+            radius + 10,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.stroke();
+
+        ctx.setLineDash([]);
+    }
+
+    /* Boss */
+
+    if(
+        ball.isBoss
+    ){
+
+        ctx.beginPath();
+
+        ctx.strokeStyle =
+            "#ffce59";
+
+        ctx.lineWidth = 5;
+
+        ctx.arc(
+            ball.x,
+            ball.y,
+            radius + 10,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.stroke();
+    }
+
+    /* HP */
+
+    const barWidth =
+        radius *
+        1.8;
+
+    const ratio =
+        clamp(
+            ball.hp /
+            ball.maxHp,
+            0,
+            1
+        );
+
+    ctx.fillStyle =
+        "rgba(0,0,0,.5)";
+
+    ctx.fillRect(
+        ball.x -
+            barWidth /
+            2,
+        ball.y -
+            radius -
+            11,
+        barWidth,
+        4
+    );
+
+    ctx.fillStyle =
+        ball === player
+            ? "#45e27c"
+            : "#ff596b";
+
+    ctx.fillRect(
+        ball.x -
+            barWidth /
+            2,
+        ball.y -
+            radius -
+            11,
+        barWidth *
+            ratio,
+        4
+    );
+}
+
+/* =========================================================
+   DRAW EVERYTHING
+========================================================= */
+
+function drawSpikes(){
+
+    for(
+        const spike of
+        spikes
+    ){
+
+        ctx.save();
+
+        ctx.translate(
+            spike.x,
+            spike.y
+        );
+
+        ctx.rotate(
+            spike.rotation
+        );
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            17,
+            0
+        );
+
+        ctx.lineTo(
+            -12,
+            -12
+        );
+
+        ctx.lineTo(
+            -12,
+            12
+        );
+
+        ctx.closePath();
+
+        ctx.fillStyle =
+            spike.poison
+                ? "#6be45f"
+                : "#e4e9ef";
+
+        ctx.fill();
+
+        ctx.strokeStyle =
+            "rgba(0,0,0,.55)";
+
+        ctx.stroke();
+
+        ctx.restore();
+
+        if(
+            spike.level >
+            1
+        ){
+
+            ctx.fillStyle =
+                "#fff";
+
+            ctx.font =
+                "bold 9px Arial";
+
+            ctx.textAlign =
+                "center";
+
+            ctx.fillText(
+                spike.level,
+                spike.x,
+                spike.y +
+                3
+            );
+        }
+    }
+}
+
+function drawHazards(){
+
+    for(
+        const h of
+        hazards
+    ){
+
+        const alpha =
+            clamp(
+                h.life /
+                h.maxLife,
+                .15,
+                .75
+            );
+
+        ctx.beginPath();
+
+        if(
+            h.type ===
+            "mine"
+        ){
+
+            ctx.fillStyle =
+                `rgba(70,76,88,${alpha})`;
+
+        }else if(
+            h.type ===
+            "poison"
+        ){
+
+            ctx.fillStyle =
+                `rgba(60,220,85,${alpha*.45})`;
+
+        }else if(
+            h.type ===
+            "ice"
+        ){
+
+            ctx.fillStyle =
+                `rgba(90,215,255,${alpha*.4})`;
+
+        }else{
+
+            ctx.fillStyle =
+                `rgba(235,235,235,${alpha*.16})`;
+        }
+
+        ctx.arc(
+            h.x,
+            h.y,
+            h.radius,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+
+        if(
+            h.type ===
+            "web"
+        ){
+
+            ctx.strokeStyle =
+                `rgba(240,240,240,${alpha})`;
+
+            for(
+                let i = 0;
+                i < 8;
+                i++
+            ){
+
+                const angle =
+                    i /
+                    8 *
+                    Math.PI *
+                    2;
+
+                ctx.beginPath();
+
+                ctx.moveTo(
+                    h.x,
+                    h.y
+                );
+
+                ctx.lineTo(
+                    h.x +
+                    Math.cos(
+                        angle
+                    ) *
+                    h.radius,
+                    h.y +
+                    Math.sin(
+                        angle
+                    ) *
+                    h.radius
+                );
+
+                ctx.stroke();
+            }
+        }
+    }
+
+    /* Chaos objects */
+
+    for(
+        const h of
+        arenaHazards
+    ){
+
+        ctx.beginPath();
+
+        ctx.fillStyle =
+            h.type ===
+                "fire"
+                ? "rgba(255,90,40,.3)"
+                : "rgba(120,140,255,.25)";
+
+        ctx.arc(
+            h.x,
+            h.y,
+            h.radius,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+    }
+}
+
+function drawStructures(){
+
+    for(
+        const s of
+        structures
+    ){
+
+        if(
+            s.type ===
+            "wall"
+        ){
+
+            ctx.fillStyle =
+                "rgba(150,160,180,.6)";
+
+            ctx.strokeStyle =
+                "rgba(220,225,235,.85)";
+
+            ctx.fillRect(
+                s.x -
+                    s.width /
+                    2,
+                s.y -
+                    s.height /
+                    2,
+                s.width,
+                s.height
+            );
+
+            ctx.strokeRect(
+                s.x -
+                    s.width /
+                    2,
+                s.y -
+                    s.height /
+                    2,
+                s.width,
+                s.height
+            );
+
+        }else if(
+            s.type ===
+            "turret"
+        ){
+
+            ctx.beginPath();
+
+            ctx.fillStyle =
+                "#5c7282";
+
+            ctx.arc(
+                s.x,
+                s.y,
+                13,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+            ctx.fillStyle =
+                "#d4e8f3";
+
+            ctx.fillRect(
+                s.x,
+                s.y - 3,
+                20,
+                6
+            );
+
+        }else if(
+            s.type ===
+            "crystal"
+        ){
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                s.x,
+                s.y -
+                    16
+            );
+
+            ctx.lineTo(
+                s.x +
+                    11,
+                s.y +
+                    8
+            );
+
+            ctx.lineTo(
+                s.x -
+                    10,
+                s.y +
+                    8
+            );
+
+            ctx.closePath();
+
+            ctx.fillStyle =
+                "#69c4ff";
+
+            ctx.fill();
+
+            ctx.strokeStyle =
+                "#c3edff";
+
+            ctx.stroke();
+        }
+    }
+}
+
+function drawProjectiles(){
+
+    for(
+        const p of
+        projectiles
+    ){
+
+        let color =
+            "#fff";
+
+        if(
+            p.type ===
+            "homing"
+        ){
+
+            color =
+                "#ff7cb8";
+        }
+
+        if(
+            p.type ===
+            "boomerang"
+        ){
+
+            color =
+                "#d2a05d";
+        }
+
+        if(
+            p.type ===
+            "boss"
+        ){
+
+            color =
+                "#ffcf66";
+        }
+
+        ctx.beginPath();
+
+        ctx.fillStyle =
+            color;
+
+        ctx.shadowBlur =
+            10;
+
+        ctx.shadowColor =
+            color;
+
+        ctx.arc(
+            p.x,
+            p.y,
+            p.radius,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+
+        ctx.shadowBlur =
+            0;
+    }
+}
+
+function drawMinions(){
+
+    for(
+        const m of
+        minions
+    ){
+
+        if(
+            m.type ===
+            "drone"
+        ){
+
+            ctx.beginPath();
+
+            ctx.fillStyle =
+                "#52c4c4";
+
+            ctx.arc(
+                m.x,
+                m.y,
+                7,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+            ctx.strokeStyle =
+                "#d0ffff";
+
+            ctx.stroke();
+
+        }else if(
+            m.type ===
+            "split"
+        ){
+
+            ctx.beginPath();
+
+            ctx.fillStyle =
+                m.stage === 2
+                    ? "rgba(255,213,75,.95)"
+                    : "rgba(255,225,105,.75)";
+
+            ctx.arc(
+                m.x,
+                m.y,
+                m.radius,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+            if(
+                m.stage ===
+                2
+            ){
+
+                ctx.beginPath();
+
+                ctx.strokeStyle =
+                    "#fff1a2";
+
+                ctx.lineWidth =
+                    2;
+
+                ctx.arc(
+                    m.x,
+                    m.y,
+                    m.radius +
+                    4,
+                    0,
+                    Math.PI * 2
+                );
+
+                ctx.stroke();
+            }
+
+        }else if(
+            m.type ===
+            "clone"
+        ){
+
+            ctx.beginPath();
+
+            ctx.fillStyle =
+                "rgba(170,140,255,.8)";
+
+            ctx.arc(
+                m.x,
+                m.y,
+                m.radius,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+        }
+    }
+}
+
+function drawParticles(){
+
+    for(
+        const p of
+        particles
+    ){
+
+        const alpha =
+            clamp(
+                p.life /
+                p.maxLife,
+                0,
+                1
+            );
+
+        if(
+            p.type ===
+            "particle"
+        ){
+
+            ctx.globalAlpha =
+                alpha;
+
+            ctx.fillStyle =
+                p.color;
+
+            ctx.beginPath();
+
+            ctx.arc(
+                p.x,
+                p.y,
+                p.size,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+            ctx.globalAlpha =
+                1;
+
+        }else if(
+            p.type ===
+            "explosion"
+        ){
+
+            ctx.globalAlpha =
+                alpha;
+
+            ctx.beginPath();
+
+            ctx.strokeStyle =
+                p.color;
+
+            ctx.lineWidth =
+                4 *
+                alpha;
+
+            ctx.arc(
+                p.x,
+                p.y,
+                p.radius,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.stroke();
+
+            ctx.globalAlpha =
+                1;
+
+        }else if(
+            p.type ===
+            "ring"
+        ){
+
+            ctx.globalAlpha =
+                alpha;
+
+            ctx.beginPath();
+
+            ctx.strokeStyle =
+                p.color;
+
+            ctx.lineWidth =
+                5 *
+                alpha;
+
+            ctx.arc(
+                p.x,
+                p.y,
+                p.radius,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.stroke();
+
+            ctx.globalAlpha =
+                1;
+        }
+    }
+}
+
+/* =========================================================
+   DRAW
+========================================================= */
+
+function draw(){
+
+    drawArena();
+
+    drawHazards();
+
+    drawStructures();
+
+    drawProjectiles();
+
+    drawMinions();
+
+    drawSpikes();
+
+    drawBall(player);
+
+    drawBall(enemy);
+
+    drawParticles();
+
+    /*
+       Aim line only during
+       Direction Stage.
+    */
+
+    if(
+        aiming &&
+        player &&
+        !player.dead
+    ){
+
+        ctx.save();
+
+        ctx.setLineDash(
+            [7,6]
+        );
+
+        ctx.strokeStyle =
+            "rgba(255,255,255,.55)";
+
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            player.x,
+            player.y
+        );
+
+        ctx.lineTo(
+            aimMouseX,
+            aimMouseY
+        );
+
+        ctx.stroke();
+
+        ctx.setLineDash([]);
+
+        ctx.beginPath();
+
+        ctx.fillStyle =
+            "rgba(255,255,255,.9)";
+
+        ctx.arc(
+            aimMouseX,
+            aimMouseY,
+            4,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    /*
+       Countdown.
+    */
+
+    if(
+        countdown > 0
+    ){
+
+        ctx.fillStyle =
+            "rgba(255,255,255,.95)";
+
+        ctx.font =
+            "bold 54px Arial";
+
+        ctx.textAlign =
+            "center";
+
+        ctx.textBaseline =
+            "middle";
+
+        ctx.fillText(
+            String(
+                countdownShown
+            ),
+            ARENA_W / 2,
+            ARENA_H / 2
+        );
+    }
+}
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+buildBallCards();
+
+updateAbilityInfo();
+
+player =
+    createBall(
+        selectedBallType,
+        ARENA_W * .25,
+        ARENA_H * .5,
+        true
+    );
+
+enemy =
+    createBall(
+        enemyBallType,
+        ARENA_W * .75,
+        ARENA_H * .5,
+        false
+    );
+
+player.vx =
+    player.vy =
+    enemy.vx =
+    enemy.vy = 0;
+
+updatePreviewLabels();
+
+updateHealthUI();
+
+updateProfileUI();
+
+/* =========================================================
+   GAME LOOP
+========================================================= */
+
+function gameLoop(
+    now
+){
+
+    let dt =
+        (
+            now -
+            lastTime
+        ) /
+        1000;
+
+    lastTime =
+        now;
+
+    dt =
+        Math.min(
+            dt,
+            .033
+        );
+
+    if(
+        fightRunning
+    ){
+
+        /*
+           Countdown happens after
+           both balls are launched.
+        */
+
+        if(
+            countdown >
+            0
+        ){
+
+            countdown -=
+                dt;
+
+            countdownShown =
+                Math.max(
+                    1,
+                    Math.ceil(
+                        countdown *
+                        3
+                    )
+                );
+
+            if(
+                countdown <=
+                0
+            ){
+
+                countdown = 0;
+
+                fightStage =
+                    "fight";
+
+                status.textContent =
+                    "Stage 3 — Fight in progress!";
+
+                startBtn.textContent =
+                    "Fight Running";
+            }
+        }
+
+        updateBall(
+            player,
+            dt
+        );
+
+        updateBall(
+            enemy,
+            dt
+        );
+
+        updateEnemyAI(
+            dt
+        );
+
+        if(
+            !aiming &&
+            countdown <=
+            0 &&
+            player &&
+            enemy &&
+            !player.dead &&
+            !enemy.dead
+        ){
+
+            handleBallCollision(
+                player,
+                enemy
+            );
+
+            updateHazards(
+                dt
+            );
+
+            updateProjectiles(
+                dt
+            );
+
+            updateStructures(
+                dt
+            );
+
+            updateMinions(
+                dt
+            );
+
+            updateArenaHazards(
+                dt
+            );
+        }
+
+        updateHealthUI();
+
+        if(
+            player &&
+            enemy &&
+            !aiming &&
+            countdown <=
+            0 &&
+            (
+                player.dead ||
+                enemy.dead
+            )
+        ){
+
+            endFight();
+        }
+    }
+
+    updateParticles(
+        dt
+    );
+
+    draw();
+
+    requestAnimationFrame(
+        gameLoop
+    );
+}
+
+requestAnimationFrame(
+    gameLoo
+);
+
+</script>
+
+</body>
+</html>

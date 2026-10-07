@@ -2637,12 +2637,14 @@ function handleBallCollision(
             "berserker"
         ){
 
-            a.rage =
-                Math.min(
-                    5,
-                    a.rage +
-                    1
-                );
+            if(
+                a.rage >=
+                5
+            ){
+                a.rage = 0;
+            }else{
+                a.rage++;
+            }
         }
 
         if(
@@ -2650,12 +2652,14 @@ function handleBallCollision(
             "berserker"
         ){
 
-            b.rage =
-                Math.min(
-                    5,
-                    b.rage +
-                    1
-                );
+            if(
+                b.rage >=
+                5
+            ){
+                b.rage = 0;
+            }else{
+                b.rage++;
+            }
         }
 
         createImpactBurst(
@@ -3241,10 +3245,7 @@ function splitIntoSmallerBalls(
     parent
 ){
 
-    const count =
-        Math.random() < .5
-            ? 2
-            : 3;
+    const count = 3;
 
     createHitParticles(
         x,
@@ -7030,9 +7031,26 @@ function startNextSurvivalWave(){
         "fight";
 }
 
+function hasActiveSplitMinions(
+    isPlayer
+){
+
+    const owner =
+        isPlayer
+            ? player
+            : enemy;
+
+    return minions.some(
+        m =>
+            m.type === "split" &&
+            m.parent === owner
+    );
+}
+
 /* =========================================================
    END FIGHT
 ========================================================= */
+
 
 function endFight(){
 
@@ -8895,17 +8913,21 @@ function gameLoop(
         if(
             !aiming &&
             countdown <=
-            0 &&
-            player &&
-            enemy &&
-            !player.dead &&
-            !enemy.dead
+            0
         ){
 
-            handleBallCollision(
-                player,
-                enemy
-            );
+            if(
+                player &&
+                enemy &&
+                !player.dead &&
+                !enemy.dead
+            ){
+
+                handleBallCollision(
+                    player,
+                    enemy
+                );
+            }
 
             updateHazards(
                 dt
@@ -8937,8 +8959,14 @@ function gameLoop(
             countdown <=
             0 &&
             (
-                player.dead ||
-                enemy.dead
+                (
+                    player.dead &&
+                    !hasActiveSplitMinions(true)
+                ) ||
+                (
+                    enemy.dead &&
+                    !hasActiveSplitMinions(false)
+                )
             )
         ){
 
